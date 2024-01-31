@@ -35,7 +35,7 @@ namespace B1_Test_Task.ViewModels
         #region RemoveGroupCommand
 
 
-        public ICommand GenerateFilesCommand { get; }
+        public BaseCommand GenerateFilesCommand { get; }
 
         private async void OnGenerateFilesCommandExecuted(object c)
         {
@@ -47,6 +47,7 @@ namespace B1_Test_Task.ViewModels
                 FilesCreatedAmount++;
             }
             FilesAreCreating = false;
+            GenerateFilesCommand.RaiseCanExecuteChanged();
 
         }
 
