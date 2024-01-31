@@ -18,6 +18,7 @@
                 </TabItem.Header>
                 <Grid>
                     <Button Content="Generate files" HorizontalAlignment="Left" Margin="31,43,0,0" VerticalAlignment="Top" Width="98" Command="{Binding GenerateFilesCommand}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="31,76,0,0" Text="{Binding FilesCreatedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
                 </Grid>
             </TabItem>

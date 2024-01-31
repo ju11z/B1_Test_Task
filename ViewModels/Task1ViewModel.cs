@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace B1_Test_Task.ViewModels
@@ -18,7 +19,14 @@ namespace B1_Test_Task.ViewModels
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Random random = new Random();
-        private FileService fileService = new FileService();
+        private XMLFileService fileService = new XMLFileService();
+
+        private int filesCreatedAmount=0;
+        public int FilesCreatedAmount { get => filesCreatedAmount; set => Set(ref filesCreatedAmount, value); }
+
+        public bool FilesAreCreating { get => filesAreCreating; set => Set(ref filesAreCreating, value); }
+        private bool filesAreCreating;
+
 
         #endregion
 
@@ -29,20 +37,23 @@ namespace B1_Test_Task.ViewModels
 
         public ICommand GenerateFilesCommand { get; }
 
-        private void OnGenerateFilesCommandExecuted(object c)
+        private async void OnGenerateFilesCommandExecuted(object c)
         {
+            FilesAreCreating = true;
             for(int i=0; i< FILES_AMOUNT; i++)
             {
                 string fileName = $"data_{i+1}.xml";
-                GenerateFileData(fileName);
+                await GenerateFileData(fileName);
+                FilesCreatedAmount++;
             }
+            FilesAreCreating = false;
 
         }
 
         private bool CanGenerateFilesCommandExecute(object c)
         {
             
-            return true;
+            return !FilesAreCreating;
 
         }
         #endregion
@@ -58,15 +69,17 @@ namespace B1_Test_Task.ViewModels
 
         #region METHODS
 
-        private void GenerateFileData(string fileName)
+        private async Task GenerateFileData(string fileName)
         {
             List<Row> rows = new List<Row>();
+            int a=0;
             for (int i = 0; i < ROWS_IN_FILE_AMOUNT; i++)
             {
                 Row row = GenerateRowData();
                 rows.Add(row);
+                a++;
             }
-            fileService.WriteDataToFile(rows, fileName);
+            await fileService.WriteDataToFileAsync(rows, fileName);
         }
 
         private Row GenerateRowData()
