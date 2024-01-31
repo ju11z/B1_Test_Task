@@ -6,7 +6,7 @@ using System.Text;
 
 namespace B1_Test_Task.ViewModels.Base
 {
-    class BaseViewModel: INotifyPropertyChanged
+    public class BaseViewModel: INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
