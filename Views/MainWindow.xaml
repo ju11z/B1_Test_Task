@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Window.DataContext>
-        <vm:Task1ViewModel></vm:Task1ViewModel>
+        <vm:MainWindowViewModel></vm:MainWindowViewModel>
     </Window.DataContext>
     <Grid>
         <TabControl>
@@ -17,14 +17,22 @@
                     <TextBlock Text="Task 1"></TextBlock>
                 </TabItem.Header>
                 <Grid>
-                    <Button Content="Generate files" HorizontalAlignment="Left" Margin="31,43,0,0" VerticalAlignment="Top" Width="98" Command="{Binding GenerateFilesCommand}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="31,76,0,0" Text="{Binding FilesCreatedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                    <Button Content="Concatenate files" HorizontalAlignment="Left" Margin="31,110,0,0" VerticalAlignment="Top" Width="98" Command="{Binding ConcatenateFilesCommand}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="31,149,0,0" Text="{Binding ConcatenateProcessState, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="366,112,0,0" Text="{Binding DeleteSubstring, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="199,146,0,0" Text="{Binding RowsDeletedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                    <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,171,0,0" VerticalAlignment="Top" Width="98" Command="{Binding ImportDataToDBCommand}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="34,209,0,0" Text="{Binding RowsImportedToDBCount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <Button Content="Generate files" HorizontalAlignment="Left" Margin="31,43,0,0" VerticalAlignment="Top" Width="98" Command="{Binding Task1ViewModel.GenerateFilesCommand}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="31,76,0,0" Text="{Binding Task1ViewModel.FilesCreatedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <Button Content="Concatenate files" HorizontalAlignment="Left" Margin="31,110,0,0" VerticalAlignment="Top" Width="98" Command="{Binding Task1ViewModel.ConcatenateFilesCommand}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="31,149,0,0" Text="{Binding Task1ViewModel.ConcatenateProcessState, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <TextBox HorizontalAlignment="Left" Margin="366,112,0,0" Text="{Binding Task1ViewModel.DeleteSubstring, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="199,146,0,0" Text="{Binding Task1ViewModel.RowsDeletedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,171,0,0" VerticalAlignment="Top" Width="98" Command="{Binding Task1ViewModel.ImportDataToDBCommand}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="34,209,0,0" Text="{Binding Task1ViewModel.RowsImportedToDBCount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="Task 2"></TextBlock>
+                </TabItem.Header>
+                <Grid>
+                    
                 </Grid>
             </TabItem>
             
