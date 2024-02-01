@@ -16,7 +16,7 @@ namespace B1_Test_Task.ViewModels
     {
         #region PROPERTIES
 
-        const int FILES_AMOUNT = 20;
+        const int FILES_AMOUNT = 10;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Random random = new Random();
@@ -240,9 +240,9 @@ namespace B1_Test_Task.ViewModels
             RowsDeletedAmount++;
         }
 
-        private void UpdateRowsImportedToDBCount()
+        private void UpdateRowsImportedToDBCount(int amount)
         {
-            RowsImportedToDBCount++;
+            RowsImportedToDBCount+=amount;
         }
 
         #endregion

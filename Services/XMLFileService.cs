@@ -15,8 +15,10 @@ namespace B1_Test_Task.Services
 {
     class XMLFileService
     {
+        private const int IMPORT_BLOCK_SIZE = 5000;
+
         public Action RowDeleted;
-        public Action RowImportedToDB;
+        public Action<int> RowImportedToDB;
         public void WriteDataToFile(List<Row> instances, string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
@@ -187,10 +189,27 @@ namespace B1_Test_Task.Services
             //await Task.Delay(5000);
         }
 
-        public async Task ImportDataToDB(Task1Context context,string filePath)
+        public async Task ImportDataToDB(Task1Context context, string filePath)
         {
             List<Row> rows = await ReadDataFromFileAsync(filePath);
 
+            List<Row> block = new List<Row>();
+            await Task.Run(() =>
+            {
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    block.Add(rows[i]);
+
+                    if (i % IMPORT_BLOCK_SIZE == 0)
+                    {
+                        RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
+                        context.Rows.AddRange(block);
+                        context.SaveChanges();
+                        block.Clear();
+                    }
+                }
+            });
+                /*
             await Task.Run(() =>
             {
                 {
@@ -203,6 +222,7 @@ namespace B1_Test_Task.Services
                 }
             }
                 );
+                */
 
             
 
