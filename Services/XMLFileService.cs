@@ -191,14 +191,22 @@ namespace B1_Test_Task.Services
         {
             List<Row> rows = await ReadDataFromFileAsync(filePath);
 
-            foreach(Row row in rows)
+            await Task.Run(() =>
             {
-                context.Rows.Add(row);
-                RowImportedToDB?.Invoke();
-                context.SaveChanges();
+                {
+                    foreach (Row row in rows)
+                    {
+                        context.Rows.Add(row);
+                        RowImportedToDB?.Invoke();
+                        context.SaveChanges();
+                    }
+                }
             }
+                );
 
             
+
+
         }
 
         
