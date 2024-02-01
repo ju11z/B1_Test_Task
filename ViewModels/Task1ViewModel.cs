@@ -15,7 +15,7 @@ namespace B1_Test_Task.ViewModels
     {
         #region PROPERTIES
 
-        const int FILES_AMOUNT = 100;
+        const int FILES_AMOUNT = 20;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Random random = new Random();
@@ -24,15 +24,22 @@ namespace B1_Test_Task.ViewModels
         private int filesCreatedAmount=0;
         public int FilesCreatedAmount { get => filesCreatedAmount; set => Set(ref filesCreatedAmount, value); }
 
+        
+
         public bool FilesAreCreating { get => filesAreCreating; set => Set(ref filesAreCreating, value); }
         private bool filesAreCreating;
+
+        private List<string> fileNames = new List<string>();
+
+        private string concatenateProcessState;
+        public string ConcatenateProcessState { get=>concatenateProcessState; set=>Set(ref concatenateProcessState,value); }
 
 
         #endregion
 
         #region COMMANDS
 
-        #region RemoveGroupCommand
+        #region  GenerateFilesCommand
 
 
         public BaseCommand GenerateFilesCommand { get; }
@@ -43,6 +50,7 @@ namespace B1_Test_Task.ViewModels
             for(int i=0; i< FILES_AMOUNT; i++)
             {
                 string fileName = $"data_{i+1}.xml";
+                fileNames.Add(fileName);
                 await GenerateFileData(fileName);
                 FilesCreatedAmount++;
             }
@@ -58,12 +66,39 @@ namespace B1_Test_Task.ViewModels
 
         }
         #endregion
+
+        #region  ConcatenateFilesCommand
+
+
+        public BaseCommand ConcatenateFilesCommand { get; }
+
+        private async void OnConcatenateFilesCommandExecuted(object c)
+        {
+            //FilesAreCreating = true;
+            ConcatenateProcessState = "concatenating files...";
+            await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
+            ConcatenateProcessState = "finished concatenating files!";
+
+            
+
+        }
+
+        private bool CanConcatenateFilesCommandExecute(object c)
+        {
+
+            return true;
+
+        }
+        #endregion
+
+
         #endregion
         #region CONSTRUCTOR
 
         public Task1ViewModel()
         {
             GenerateFilesCommand = new BaseCommand(OnGenerateFilesCommandExecuted, CanGenerateFilesCommandExecute);
+            ConcatenateFilesCommand = new BaseCommand(OnConcatenateFilesCommandExecuted, CanConcatenateFilesCommandExecute);
         }
 
         #endregion
