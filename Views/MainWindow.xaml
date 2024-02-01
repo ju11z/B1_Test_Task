@@ -22,11 +22,12 @@
                     <Button Content="Concatenate files" HorizontalAlignment="Left" Margin="31,110,0,0" VerticalAlignment="Top" Width="98" Command="{Binding ConcatenateFilesCommand}"/>
                     <TextBlock HorizontalAlignment="Left" Margin="31,149,0,0" Text="{Binding ConcatenateProcessState, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
                     <TextBox HorizontalAlignment="Left" Margin="366,112,0,0" Text="{Binding DeleteSubstring, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="34,170,0,0" Text="{Binding RowsDeletedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
-
-
+                    <TextBlock HorizontalAlignment="Left" Margin="199,146,0,0" Text="{Binding RowsDeletedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,171,0,0" VerticalAlignment="Top" Width="98" Command="{Binding ImportDataToDBCommand}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="34,209,0,0" Text="{Binding RowsImportedToDBCount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
+            
         </TabControl>
     </Grid>
 </Window>

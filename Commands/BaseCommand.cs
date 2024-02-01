@@ -28,7 +28,6 @@ namespace B1_Test_Task.Commands
         }
 
 
-
         public bool CanExecute(object parameter)
         {
             return _CanExecute?.Invoke(parameter) ?? true;

@@ -1,4 +1,5 @@
 ﻿using B1_Test_Task.Commands;
+using B1_Test_Task.Data;
 using B1_Test_Task.Models.Task_1;
 using B1_Test_Task.Services;
 using B1_Test_Task.ViewModels.Base;
@@ -27,6 +28,9 @@ namespace B1_Test_Task.ViewModels
         private int rowsDeletedAmount;
         public int RowsDeletedAmount { get => rowsDeletedAmount; set => Set(ref rowsDeletedAmount, value); }
 
+        private int rowsImportedToDBCount;
+        public int RowsImportedToDBCount { get => rowsImportedToDBCount; set => Set(ref rowsImportedToDBCount, value); }
+
 
 
         public bool FilesAreCreating { get => filesAreCreating; set => Set(ref filesAreCreating, value); }
@@ -38,6 +42,10 @@ namespace B1_Test_Task.ViewModels
         public string ConcatenateProcessState { get=>concatenateProcessState; set=>Set(ref concatenateProcessState,value); }
 
         public string DeleteSubstring { get; set; }
+
+        private Task1Context context;
+
+        //private Task1Context context;
 
 
         #endregion
@@ -99,6 +107,27 @@ namespace B1_Test_Task.ViewModels
         }
         #endregion
 
+        #region  ImportDataToDBCommand
+
+
+        public BaseCommand ImportDataToDBCommand { get; }
+
+        private async void OnImportDataToDBCommandExecuted(object c)
+        {
+            await fileService.ImportDataToDB(context,"data_common.xml");
+
+        }
+
+
+
+        private bool CanImportDataToDBCommandExecute(object c)
+        {
+
+            return true;
+
+        }
+        #endregion
+
 
         #endregion
         #region CONSTRUCTOR
@@ -107,8 +136,13 @@ namespace B1_Test_Task.ViewModels
         {
             GenerateFilesCommand = new BaseCommand(OnGenerateFilesCommandExecuted, CanGenerateFilesCommandExecute);
             ConcatenateFilesCommand = new BaseCommand(OnConcatenateFilesCommandExecuted, CanConcatenateFilesCommandExecute);
+            ImportDataToDBCommand = new BaseCommand(OnImportDataToDBCommandExecuted, CanImportDataToDBCommandExecute);
+
+            context = new Task1Context();
+
 
             fileService.RowDeleted += UpdateRowsDeletedCount;
+            fileService.RowImportedToDB += UpdateRowsImportedToDBCount;
         }
 
         #endregion
@@ -204,6 +238,11 @@ namespace B1_Test_Task.ViewModels
         private void UpdateRowsDeletedCount()
         {
             RowsDeletedAmount++;
+        }
+
+        private void UpdateRowsImportedToDBCount()
+        {
+            RowsImportedToDBCount++;
         }
 
         #endregion

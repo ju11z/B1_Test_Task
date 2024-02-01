@@ -7,10 +7,11 @@ namespace B1_Test_Task.Models.Task_1
     [Serializable]
     public class Row
     {
-        public DateTime RanDate;
-        public string RanLatin;
-        public string RanCyrillic;
-        public uint RanUint;
-        public double RanDecimal;
+        public int Id { get; set; }
+        public DateTime RanDate { get; set; }
+        public string RanLatin { get; set; }
+        public string RanCyrillic { get; set; }
+        public uint RanUint{ get; set; }
+        public double RanDecimal { get; set; }
     }
 }

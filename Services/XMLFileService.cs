@@ -1,4 +1,5 @@
-﻿using B1_Test_Task.Models.Task_1;
+﻿using B1_Test_Task.Data;
+using B1_Test_Task.Models.Task_1;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,7 @@ namespace B1_Test_Task.Services
     class XMLFileService
     {
         public Action RowDeleted;
+        public Action RowImportedToDB;
         public void WriteDataToFile(List<Row> instances, string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
@@ -24,12 +26,14 @@ namespace B1_Test_Task.Services
             }
         }
 
-        public List<Row> ReadDataFromFile(string filePath)
+        public async Task <List<Row>> ReadDataFromFileAsync(string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
             using (StreamReader reader = new StreamReader(filePath))
             {
-                return (List<Row>)serializer.Deserialize(reader);
+                return await Task.Run(() => 
+                (List<Row>)serializer.Deserialize(reader)
+                );
             }
         }
 
@@ -59,7 +63,7 @@ namespace B1_Test_Task.Services
 
 
 
-        public List<Row> ReadDataFromFileAsync(string filePath)
+        public List<Row> ReadDataFromFile(string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
             using (StreamReader reader = new StreamReader(filePath))
@@ -111,6 +115,13 @@ namespace B1_Test_Task.Services
 
             List<XDocument> xmlDocuments = new List<XDocument>();
 
+            /*
+             using (var writer = XmlWriter.Create(stream, new XmlWriterSettings { Async = true }))
+                    {
+                        await Task.Run(() => serializer.Serialize(writer, instances));
+                    }
+             */
+
             foreach (string filePath in fileNames)
             {
                 if (File.Exists(filePath))
@@ -134,7 +145,7 @@ namespace B1_Test_Task.Services
             */
 
             XDocument concatenatedDocument = await Task.Run( async () => new XDocument(
-               new XElement("Root", await Task.Run(async () =>
+               new XElement("ArrayOfRow", await Task.Run(async () =>
     xmlDocuments.SelectMany(doc => doc.Root.Elements())
                    ))
                ));
@@ -174,6 +185,20 @@ namespace B1_Test_Task.Services
 
 
             //await Task.Delay(5000);
+        }
+
+        public async Task ImportDataToDB(Task1Context context,string filePath)
+        {
+            List<Row> rows = await ReadDataFromFileAsync(filePath);
+
+            foreach(Row row in rows)
+            {
+                context.Rows.Add(row);
+                RowImportedToDB?.Invoke();
+                context.SaveChanges();
+            }
+
+            
         }
 
         
