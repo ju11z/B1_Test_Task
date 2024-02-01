@@ -21,6 +21,9 @@
                     <TextBlock HorizontalAlignment="Left" Margin="31,76,0,0" Text="{Binding FilesCreatedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
                     <Button Content="Concatenate files" HorizontalAlignment="Left" Margin="31,110,0,0" VerticalAlignment="Top" Width="98" Command="{Binding ConcatenateFilesCommand}"/>
                     <TextBlock HorizontalAlignment="Left" Margin="31,149,0,0" Text="{Binding ConcatenateProcessState, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <TextBox HorizontalAlignment="Left" Margin="366,112,0,0" Text="{Binding DeleteSubstring, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="34,170,0,0" Text="{Binding RowsDeletedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+
 
                 </Grid>
             </TabItem>

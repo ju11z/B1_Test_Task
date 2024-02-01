@@ -14,6 +14,7 @@ namespace B1_Test_Task.Services
 {
     class XMLFileService
     {
+        public Action RowDeleted;
         public void WriteDataToFile(List<Row> instances, string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
@@ -23,7 +24,6 @@ namespace B1_Test_Task.Services
             }
         }
 
-        // Method to read data from a file using XML deserialization
         public List<Row> ReadDataFromFile(string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
@@ -35,41 +35,30 @@ namespace B1_Test_Task.Services
 
         public async Task WriteDataToFileAsync(List<Row> instances, string filePath)
         {
-            /*
-            XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                serializer.Serialize(writer, classInstance);
-            }
-            */
-
+            
             try
             {
-                // Create a FileStream to write the XML file
+                
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     var serializer = new XmlSerializer(typeof(List<Row>));
 
-                    // Use the XmlWriter to handle the asynchronous writing process
+                    
                     using (var writer = XmlWriter.Create(stream, new XmlWriterSettings { Async = true }))
                     {
-                        // Serialize the list of class instances and write to the XML file asynchronously
                         await Task.Run(() => serializer.Serialize(writer, instances));
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Handle any exceptions 
                 Console.WriteLine("Error writing to XML: " + ex.Message);
             }
 
-            //await Task.Delay(200);
         }
 
 
 
-        // Method to read data from a file using XML deserialization
         public List<Row> ReadDataFromFileAsync(string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
@@ -77,6 +66,44 @@ namespace B1_Test_Task.Services
             {
                 return (List<Row>)serializer.Deserialize(reader);
             }
+        }
+
+        public async Task DeleteRowsAsync(List<string> filePaths, string substring)
+        {
+            foreach(string filePath in filePaths)
+            {
+                
+                List<Row> oldRows;
+                List<Row> newRows=new List<Row>();
+                XmlSerializer serializer = new XmlSerializer(typeof(List<Row>));
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    oldRows = await Task.Run(()=>(List<Row>)serializer.Deserialize(reader));
+                }
+
+                //substring = "jj";
+
+                foreach (Row row in oldRows)
+                {
+                    
+                    if (row.RanLatin.Contains(substring) || row.RanCyrillic.Contains(substring))
+                    {
+
+                        RowDeleted.Invoke();
+                        continue;
+                    }
+                    newRows.Add(row);
+                }
+                
+
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    await Task.Run(() => serializer.Serialize(writer, newRows));
+                }
+                
+            }
+            
+            await Task.CompletedTask;
         }
 
         public async Task ConcatenateXmlFilesAsync(List<string> fileNames, string outputFileName)
@@ -89,6 +116,7 @@ namespace B1_Test_Task.Services
                 if (File.Exists(filePath))
                 {
                     XDocument doc = await Task.Run(() => XDocument.Load(filePath));
+
                     xmlDocuments.Add(doc);
                 }
                 else
@@ -119,25 +147,20 @@ namespace B1_Test_Task.Services
             }
 
         }
-
         
-
-    public async Task ConcatenateXmlFilesAsyncOld(List<string> fileNames, string outputFileName)
+        public async Task ConcatenateXmlFilesAsyncOld(List<string> fileNames, string outputFileName)
         {
 
             try
             {
-                // Load the first XML file into an XDocument
                 XDocument combinedXml = XDocument.Load(fileNames[0]);
 
-                // Concatenate the remaining XML files
                 for (int i = 1; i < fileNames.Count; i++)
                 {
                     XDocument nextXml = XDocument.Load(fileNames[i]);
                     combinedXml.Root.Add(nextXml.Root.Descendants());
                 }
 
-                // Save the combined XML to the specified output file
                 await Task.Run(() =>
                 {
                     combinedXml.Save(outputFileName);
@@ -145,7 +168,6 @@ namespace B1_Test_Task.Services
             }
             catch (Exception ex)
             {
-                // Handle any exceptions, e.g., log or notify the user
                 Console.WriteLine("Error concatenating XML files: " + ex.Message);
                 throw;
             }

@@ -24,7 +24,10 @@ namespace B1_Test_Task.ViewModels
         private int filesCreatedAmount=0;
         public int FilesCreatedAmount { get => filesCreatedAmount; set => Set(ref filesCreatedAmount, value); }
 
-        
+        private int rowsDeletedAmount;
+        public int RowsDeletedAmount { get => rowsDeletedAmount; set => Set(ref rowsDeletedAmount, value); }
+
+
 
         public bool FilesAreCreating { get => filesAreCreating; set => Set(ref filesAreCreating, value); }
         private bool filesAreCreating;
@@ -33,6 +36,8 @@ namespace B1_Test_Task.ViewModels
 
         private string concatenateProcessState;
         public string ConcatenateProcessState { get=>concatenateProcessState; set=>Set(ref concatenateProcessState,value); }
+
+        public string DeleteSubstring { get; set; }
 
 
         #endregion
@@ -75,13 +80,16 @@ namespace B1_Test_Task.ViewModels
         private async void OnConcatenateFilesCommandExecuted(object c)
         {
             //FilesAreCreating = true;
+            
+            Task t = fileService.DeleteRowsAsync(fileNames, DeleteSubstring);
+            await t;
             ConcatenateProcessState = "concatenating files...";
             await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
             ConcatenateProcessState = "finished concatenating files!";
 
-            
-
         }
+
+        
 
         private bool CanConcatenateFilesCommandExecute(object c)
         {
@@ -99,6 +107,8 @@ namespace B1_Test_Task.ViewModels
         {
             GenerateFilesCommand = new BaseCommand(OnGenerateFilesCommandExecuted, CanGenerateFilesCommandExecute);
             ConcatenateFilesCommand = new BaseCommand(OnConcatenateFilesCommandExecuted, CanConcatenateFilesCommandExecute);
+
+            fileService.RowDeleted += UpdateRowsDeletedCount;
         }
 
         #endregion
@@ -190,6 +200,12 @@ namespace B1_Test_Task.ViewModels
             double randomValue = random.NextDouble() * 19 + 1; // generates a random value between 1 and 20
             return Math.Round(randomValue, 8); // rounds the value to 8 decimal places
         }
+
+        private void UpdateRowsDeletedCount()
+        {
+            RowsDeletedAmount++;
+        }
+
         #endregion
     }
 }
