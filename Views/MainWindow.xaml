@@ -35,7 +35,7 @@
                     <Button Content="Upload file" Command="{Binding Task2ViewModel.UploadExcelFileCommand}" HorizontalAlignment="Left" Margin="31,28,0,0" VerticalAlignment="Top" Width="75"/>
                     <ListBox ItemsSource="{Binding Task2ViewModel.FilePaths, UpdateSourceTrigger=PropertyChanged}" Margin="31,74,324.667,221"></ListBox>
                     <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,186,0,0" VerticalAlignment="Top" Width="75" Command="{Binding Task2ViewModel.ImportFilesToDBCommand}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="31,222,0,0" TextWrapping="Wrap" Text="{Binding Task2ViewModel.RowsImportedToDBCount, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="31,222,0,0" TextWrapping="Wrap" Text="{Binding Task2ViewModel.ImportState, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             

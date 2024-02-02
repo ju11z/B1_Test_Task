@@ -17,5 +17,6 @@ namespace B1_Test_Task.ViewModels
             Task1ViewModel = new Task1ViewModel();
             Task2ViewModel = new Task2ViewModel();
         }
+
     }
 }

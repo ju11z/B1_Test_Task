@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace B1_Test_Task.ViewModels
 {
@@ -21,6 +22,9 @@ namespace B1_Test_Task.ViewModels
 
         private int rowsImportedToDBCount;
         public int RowsImportedToDBCount { get => rowsImportedToDBCount; set => Set(ref rowsImportedToDBCount, value); }
+
+        private string importState;
+        public string ImportState { get => importState; set => Set(ref importState, value); }
 
         private ExcelFileService service;
 
@@ -75,16 +79,30 @@ namespace B1_Test_Task.ViewModels
 
         private async void ImportFilesToDBCommandExecuted(object c)
         {
+
+            ImportState = "importing files...";
+
+           
+                foreach (string filePath in filePaths)
+                {
+                    try
+                    {
+                    var ImportAccountsToDB = service.ImportAccountsToDB(new Task2Context(), filePath);
+                    await ImportAccountsToDB;
+                    var ImportAccountDataToDB = service.ImportAccountDataToDB(new Task2Context(), filePath);
+                    await ImportAccountDataToDB;
+                    ImportState +=$"\nsuccesfully imported {filePath}";
+                }   
+                    catch(Exception e)
+                    {
+                    ImportState += $"\nerror imported {filePath}";
+                }
+                    
+                }
+               
             
 
-            foreach(string filePath in filePaths)
-            {
-                var ImportAccountsToDB = service.ImportAccountsToDB(new Task2Context(), filePath);
-                await ImportAccountsToDB;
-                //var ImportAccountDataToDB= service.ImportAccountDataToDB(new Task2Context(),filePath);
-                //await ImportAccountDataToDB;
-               
-            }
+            ImportState += "\nfinidhes importing files!";
 
 
         }
@@ -104,7 +122,6 @@ namespace B1_Test_Task.ViewModels
         public Task2ViewModel()
         {
             service = new ExcelFileService();
-            service.RowImportedToDB += UpdateRowsImportedToDBCount;  
 
             UploadExcelFileCommand = new BaseCommand(UploadExcelFileCommandExecuted, CanUploadExcelFileCommandExecute);
             ImportFilesToDBCommand = new BaseCommand(ImportFilesToDBCommandExecuted, CanImportFilesToDBCommandExecute);
@@ -117,10 +134,7 @@ namespace B1_Test_Task.ViewModels
         #endregion
         #region METHODS
 
-        private void UpdateRowsImportedToDBCount(int amount)
-        {
-            RowsImportedToDBCount += amount;
-        }
+        
 
         #endregion
     }
