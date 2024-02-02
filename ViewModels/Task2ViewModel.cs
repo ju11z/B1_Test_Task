@@ -79,7 +79,11 @@ namespace B1_Test_Task.ViewModels
 
             foreach(string filePath in filePaths)
             {
-                await service.ImportDataToDB(new Task2Context(),filePath);
+                var ImportAccountsToDB = service.ImportAccountsToDB(new Task2Context(), filePath);
+                await ImportAccountsToDB;
+                //var ImportAccountDataToDB= service.ImportAccountDataToDB(new Task2Context(),filePath);
+                //await ImportAccountDataToDB;
+               
             }
 
 

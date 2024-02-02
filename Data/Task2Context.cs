@@ -1,5 +1,6 @@
 using B1_Test_Task.Models.Task_2;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
 
@@ -7,7 +8,7 @@ namespace B1_Test_Task.Data
 {
     public class Task2Context : DbContext
     {
-        public DbSet<Account> Account { get; set; }
+        public DbSet<Account> Accounts { get; set; }
         public DbSet<AccountData> AccountData { get; set; }
         public DbSet<Statement> Statements { get; set; }
         // Your context has been configured to use a 'Task2Context' connection string from your application's 
