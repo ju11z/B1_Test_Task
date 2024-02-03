@@ -1,4 +1,5 @@
-﻿using System;
+﻿using B1_Test_Task.Services;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -16,13 +17,9 @@ namespace B1_Test_Task
         public App()
         {
             var currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
+            //currentDomain.UnhandledException += ExceptionNotifier.NotifyAboutException;
         }
 
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            MessageBox.Show(((Exception)e.ExceptionObject).Message);
-        }
+        
     }
 }

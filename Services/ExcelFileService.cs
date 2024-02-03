@@ -32,24 +32,60 @@ namespace B1_Test_Task.Services
         private const int OUTGOING_BALANCE_ASSET_COLUMN = 5;
         private const int OUTGOING_BALANCE_LIABILITY_COLUMN = 6;
 
+        private IWorkbook workBoook;
+
         public async Task ImportAccountsToDB(Task2Context context, string filePath)
         {
-            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                
-                IWorkbook workBook = new HSSFWorkbook(fileStream); // For .xls files, use HSSFWorkbook
+            ISheet sheet = workBoook.GetSheetAt(0);
 
-                ISheet sheet = workBook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
-
-                await ImportFirstLevelAccountToDB(sheet, context);
+            await ImportFirstLevelAccountToDB(sheet, context);
 
                 await ImportSecondLevelAccountToDB(sheet, context);
 
                 await ImportThirdLevelAccountToDB(sheet, context);
                 
+        }
 
-                
+        public async Task<string> ImportDataToDB(Task2Context context, string filePath)
+        {
+            InitWorkBook(filePath);
 
+            ISheet sheet = workBoook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
+
+            try
+            {
+                bool validate = ValidateSheet(sheet, filePath);
+            }
+            catch (Exception e)
+            {
+                ExceptionNotifier.NotifyAboutException(e.Message);
+                return $" error occured while importing {filePath}";
+            }
+
+
+            var importaccountstodb = ImportAccountsToDB(new Task2Context(), filePath);
+            await importaccountstodb;
+            var importaccountdatatodb = ImportAccountDataToDB(new Task2Context(), filePath);
+            await importaccountdatatodb;
+
+            //string importResult = $"{filePath} imported successfully";
+
+            return $"{filePath} imported successfully";
+        }
+
+        private void InitWorkBook(string filePath)
+        {
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+
+                if (fileStream.Name.EndsWith(".xlsx"))
+                {
+                    workBoook = new XSSFWorkbook(fileStream);
+                }
+                else
+                {
+                    workBoook = new HSSFWorkbook(fileStream);
+                }
             }
         }
 
@@ -85,8 +121,6 @@ namespace B1_Test_Task.Services
 
                 await context.SaveChangesAsync();
             });
-            
-
         }
 
         private int FindFirstLevelParentId(string childValue, List<Account> parents)
@@ -199,26 +233,67 @@ namespace B1_Test_Task.Services
             await context.SaveChangesAsync();
         }
 
-        private bool ValidateSheet(ISheet sheet)
+        private bool ValidateSheet(ISheet sheet, string filePath)
         {
-            IRow row = sheet.GetRow(ACCOUNT_DATA_START_ROW);
+            ICell incoming_balance_asset_column = null;
+            ICell incoming_balance_liability_column = null;
+            ICell turnover_debet_column = null;
+            ICell turnover_credit_column = null;
+            ICell outgoing_balance_asset_column = null;
+            ICell outgoing_balance_liability_column = null;
+
+            bool result = true;
+
+            try
+            {
+                IRow row = sheet.GetRow(ACCOUNT_DATA_START_ROW);
+
+                if (row == null)
+                    result = false;
+
+                if (!result)
+                    throw new Exception($"{filePath} has wrong table structure!");
+
+                incoming_balance_asset_column = row.GetCell(INCOMING_BALANCE_ASSET_COLUMN);
+                incoming_balance_liability_column = row.GetCell(INCOMING_BALANCE_LIABILITY_COLUMN);
+                turnover_debet_column = row.GetCell(TURNOVER_DEBET_COLUMN);
+                turnover_credit_column = row.GetCell(TURNOVER_CREDIT_COLUMN);
+                outgoing_balance_asset_column = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN);
+                outgoing_balance_liability_column = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN);
+
+
+
+                if (incoming_balance_asset_column == null
+                    || incoming_balance_liability_column == null
+                    || turnover_debet_column == null
+                    || turnover_credit_column == null
+                    || outgoing_balance_asset_column == null
+                    || outgoing_balance_liability_column == null
+                    )
+                    result = false;
+
+                if (!result)
+                    throw new Exception($"{filePath} has wrong table structure!");
+
+                if (!(incoming_balance_asset_column.CellType == CellType.Numeric
+                && incoming_balance_liability_column.CellType == CellType.Numeric
+                && turnover_debet_column.CellType == CellType.Numeric
+                && turnover_credit_column.CellType == CellType.Numeric
+                && outgoing_balance_asset_column.CellType == CellType.Numeric
+                && outgoing_balance_liability_column.CellType == CellType.Numeric))
+                    result = false;
+
+                if (!result)
+                    throw new Exception($"{filePath} has wrong table structure!");
+
+            }
+            catch
+            {
+                throw;
+            }
+
+            return result;
             
-            ICell incoming_balance_asset_column = row.GetCell(INCOMING_BALANCE_ASSET_COLUMN);
-            ICell incoming_balance_liability_column = row.GetCell(INCOMING_BALANCE_LIABILITY_COLUMN);
-            ICell turnover_debet_column = row.GetCell(TURNOVER_DEBET_COLUMN);
-            ICell turnover_credit_column = row.GetCell(TURNOVER_CREDIT_COLUMN);
-            ICell outgoing_balance_asset_column = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN);
-            ICell outgoing_balance_liability_column = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN);
-
-
-
-            return incoming_balance_asset_column.CellType==CellType.Numeric
-                && incoming_balance_liability_column.CellType==CellType.Numeric
-                && turnover_debet_column.CellType==CellType.Numeric
-                && turnover_credit_column.CellType==CellType.Numeric
-                && outgoing_balance_asset_column.CellType== CellType.Numeric
-                && outgoing_balance_liability_column.CellType==CellType.Numeric
-                ;
         }
 
         public async Task ImportAccountDataToDB(Task2Context context ,string filePath)
@@ -228,43 +303,53 @@ namespace B1_Test_Task.Services
 
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    IWorkbook workBook = new HSSFWorkbook(fileStream); // For .xls files, use HSSFWorkbook
+                    //IWorkbook workBook = new HSSFWorkbook(fileStream); // For .xls files, use HSSFWorkbook
 
-                    ISheet sheet = workBook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
-
-                    if (!ValidateSheet(sheet))
-                        return;
-
-                        await Task.Run(async() =>
+                    ISheet sheet = workBoook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
+                    /*
+                    try
                     {
+                        bool validate = ValidateSheet(sheet);
 
-                        for (int i = ACCOUNT_DATA_START_ROW; i <= sheet.LastRowNum; i++)
+                        if(!validate)
+                            throw new Exception("Wrong table format!");
+                    }
+                    catch(Exception e)
+                    {
+                        ExceptionNotifier.NotifyAboutException(e.Message);
+                        return;
+                    }
+                    */
+
+
+
+
+                    for (int i = ACCOUNT_DATA_START_ROW; i <= sheet.LastRowNum; i++)
+                    {
+                        IRow row = sheet.GetRow(i);
+
+                        if (row != null) // null cell values may cause null reference exceptions
                         {
-                            IRow row = sheet.GetRow(i);
-
-                            if (row != null) // null cell values may cause null reference exceptions
+                            AccountData entity = new AccountData
                             {
-                                AccountData entity = new AccountData
-                                {
-                                    IncomingBalanceAsset = row.GetCell(INCOMING_BALANCE_ASSET_COLUMN).NumericCellValue,
-                                    IncomingBalanceLiability = row.GetCell(INCOMING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
-                                    TurnoverDebet= row.GetCell(TURNOVER_DEBET_COLUMN).NumericCellValue,
-                                    TurnoverCredit= row.GetCell(TURNOVER_CREDIT_COLUMN).NumericCellValue,
-                                    OutgoingBalanceAsset= row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN).NumericCellValue,
-                                    OutgoingBalanceLiability=row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue
-                                };
+                                IncomingBalanceAsset = row.GetCell(INCOMING_BALANCE_ASSET_COLUMN).NumericCellValue,
+                                IncomingBalanceLiability = row.GetCell(INCOMING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
+                                TurnoverDebet = row.GetCell(TURNOVER_DEBET_COLUMN).NumericCellValue,
+                                TurnoverCredit = row.GetCell(TURNOVER_CREDIT_COLUMN).NumericCellValue,
+                                OutgoingBalanceAsset = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN).NumericCellValue,
+                                OutgoingBalanceLiability = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue
+                            };
 
-                                block.Add(entity);
-                            }
-
-                            if (i % IMPORT_BLOCK_SIZE == 0)
-                            {
-                                context.AccountData.AddRange(block);
-                                await context.SaveChangesAsync();
-                                block.Clear();
-                            }
+                            block.Add(entity);
                         }
-                    });
+
+                        if (i % IMPORT_BLOCK_SIZE == 0)
+                        {
+                            context.AccountData.AddRange(block);
+                            await context.SaveChangesAsync();
+                            block.Clear();
+                        }
+                    }
                 }
             }
             catch(Exception e)

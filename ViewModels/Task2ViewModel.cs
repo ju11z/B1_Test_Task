@@ -85,24 +85,16 @@ namespace B1_Test_Task.ViewModels
            
                 foreach (string filePath in filePaths)
                 {
-                    try
-                    {
-                    var ImportAccountsToDB = service.ImportAccountsToDB(new Task2Context(), filePath);
-                    await ImportAccountsToDB;
-                    var ImportAccountDataToDB = service.ImportAccountDataToDB(new Task2Context(), filePath);
-                    await ImportAccountDataToDB;
-                    ImportState +=$"\nsuccesfully imported {filePath}";
-                }   
-                    catch(Exception e)
-                    {
-                    ImportState += $"\nerror imported {filePath}";
-                }
+                    
+                    var importResult = await service.ImportDataToDB(new Task2Context(), filePath);
+                    
+                    ImportState +=$"\n{importResult}";
                     
                 }
-               
-            
-
+                 
             ImportState += "\nfinidhes importing files!";
+
+            FilePaths.Clear();
 
 
         }
@@ -114,6 +106,8 @@ namespace B1_Test_Task.ViewModels
 
         }
         #endregion
+
+        
 
 
         #endregion
