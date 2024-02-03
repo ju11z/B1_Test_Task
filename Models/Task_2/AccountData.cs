@@ -9,8 +9,8 @@ namespace B1_Test_Task.Models.Task_2
     public class AccountData
     {
         public int Id { get; set; }
-        //public int AccountId { get; set; }
-        //public Account Account { get; set; }
+        public int AccountId { get; set; }
+        public Account Account { get; set; }
         public int StatementId { get; set; }
         public Statement Statement { get; set; }
 

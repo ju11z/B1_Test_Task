@@ -137,6 +137,9 @@ namespace B1_Test_Task.Services
 
         private async Task ImportFirstLevelAccountToDB(ISheet sheet, Task2Context context)
         {
+            string pattern = @"\d+";
+            int code=0;
+
             await Task.Run(async () =>
             {
 
@@ -152,10 +155,17 @@ namespace B1_Test_Task.Services
                         //string value = row.GetCell(ACCOUNT_COLUMN).NumericCellValue.ToString();
                         if (value.Contains("КЛАСС") && !value.Contains("КЛАССУ"))
                         {
+                            Match match = Regex.Match(value, pattern);
+
+                            if (match.Success)
+                            {
+                                code = Int32.Parse(match.Value);
+                            }
                             Account entity = new Account
                             {
                                 ParentId = 0,
-                                Value = value
+                                Code = code,
+                                Title=value
                             };
 
                             context.Accounts.Add(entity);
@@ -171,7 +181,7 @@ namespace B1_Test_Task.Services
         {
             int parentId = 0;
 
-            Account account = parents.Find(p => p.Value.Contains(childValue[0]));
+            Account account = parents.Find(p => p.Code.ToString().Contains(childValue[0]));
 
             if (account != null)
                 return account.Id;
@@ -183,8 +193,9 @@ namespace B1_Test_Task.Services
         private int FindSecondLevelParentId(string childValue, List<Account> parents)
         {
             int parentId = 0;
+            List<Account> secondLevelParents = parents.Where(p => p.Code.ToString().Length > 1).ToList();
 
-            Account account = parents.Find(p => p.Value.Substring(0,2)==childValue.Substring(0, 2));
+            Account account = secondLevelParents.Find(p => p.Code.ToString().Substring(0,2)==childValue.Substring(0, 2));
 
             if (account != null)
                 return account.Id;
@@ -218,10 +229,11 @@ namespace B1_Test_Task.Services
                         {
                             
                             int parentId = FindFirstLevelParentId(value, parents);
+                            int code = Int32.Parse(value);
                             Account entity = new Account
                             {
                                 ParentId = parentId,
-                                Value = value
+                                Code = code
                             };
 
                             context.Accounts.Add(entity);
@@ -258,12 +270,12 @@ namespace B1_Test_Task.Services
                         MatchCollection matches = regex.Matches(value);
                         if (matches.Count == 1)
                         {
-
+                            int code= Int32.Parse(value);
                             int parentId = FindSecondLevelParentId(value, parents);
                             Account entity = new Account
                             {
                                 ParentId = parentId,
-                                Value = value
+                                Code = code
                             };
 
                             context.Accounts.Add(entity);
@@ -342,35 +354,21 @@ namespace B1_Test_Task.Services
 
         public async Task ImportAccountDataToDB(int statementId, Task2Context context ,string filePath)
         {
+
             try { 
                 List<AccountData> block = new List<AccountData>();
 
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    //IWorkbook workBook = new HSSFWorkbook(fileStream); // For .xls files, use HSSFWorkbook
-
+                    
                     ISheet sheet = workBoook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
-                    /*
-                    try
-                    {
-                        bool validate = ValidateSheet(sheet);
-
-                        if(!validate)
-                            throw new Exception("Wrong table format!");
-                    }
-                    catch(Exception e)
-                    {
-                        ExceptionNotifier.NotifyAboutException(e.Message);
-                        return;
-                    }
-                    */
-
-
-
-
+                    
                     for (int i = ACCOUNT_DATA_START_ROW; i <= sheet.LastRowNum; i++)
                     {
                         IRow row = sheet.GetRow(i);
+
+                        if (row.GetCell(0).ToString().Contains("КЛАСС") || row.GetCell(0).ToString().Contains("БАЛАНС"))
+                            continue;
 
                         if (row != null) // null cell values may cause null reference exceptions
                         {
@@ -382,7 +380,8 @@ namespace B1_Test_Task.Services
                                 TurnoverCredit = row.GetCell(TURNOVER_CREDIT_COLUMN).NumericCellValue,
                                 OutgoingBalanceAsset = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN).NumericCellValue,
                                 OutgoingBalanceLiability = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
-                                StatementId=statementId
+                                StatementId=statementId,
+                                AccountId= await FindAccountIdByValue(Int32.Parse(row.GetCell(ACCOUNT_COLUMN).ToString()), context)
                             };
 
                             block.Add(entity);
@@ -399,8 +398,20 @@ namespace B1_Test_Task.Services
             }
             catch(Exception e)
             {
+                ExceptionNotifier.NotifyAboutException(e.Message);
                 return;
             }
+
+            
+        }
+
+        private async Task<int> FindAccountIdByValue(int code, Task2Context context)
+        {
+            List<Account> accounts = context.Accounts.ToList();
+            int id= await Task.Run(async () => accounts.Find(a => a.Code == code).Id);
+            if (id != null)
+                return id;
+            return 0;
         }
     }
 }
