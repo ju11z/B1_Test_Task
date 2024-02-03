@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace B1_Test_Task.Models.Task_2
 {
-    public class AccountData
+    public class BalanceSheet
     {
         public int Id { get; set; }
         public int AccountId { get; set; }

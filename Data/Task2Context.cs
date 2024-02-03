@@ -9,7 +9,7 @@ namespace B1_Test_Task.Data
     public class Task2Context : DbContext
     {
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<AccountData> AccountData { get; set; }
+        public DbSet<BalanceSheet> AccountData { get; set; }
         public DbSet<Statement> Statements { get; set; }
         // Your context has been configured to use a 'Task2Context' connection string from your application's 
         // configuration file (App.config or Web.config). By default, this connection string targets the 

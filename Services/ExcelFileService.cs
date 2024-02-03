@@ -40,7 +40,7 @@ namespace B1_Test_Task.Services
 
         private IWorkbook workBoook;
 
-        public async Task ImportAccountsToDB(Task2Context context, string filePath)
+        private async Task ImportAccountsToDB(Task2Context context, string filePath)
         {
             ISheet sheet = workBoook.GetSheetAt(0);
 
@@ -81,7 +81,7 @@ namespace B1_Test_Task.Services
             int statementId = ImportStatementToDB(sheet, context);
             var importaccountstodb = ImportAccountsToDB(context, filePath);
             await importaccountstodb;
-            var importaccountdatatodb = ImportAccountDataToDB(statementId, context, filePath);
+            var importaccountdatatodb = ImportBalanceSheetToDB(statementId, context, filePath);
             await importaccountdatatodb;
 
             //string importResult = $"{filePath} imported successfully";
@@ -386,11 +386,11 @@ namespace B1_Test_Task.Services
             
         }
 
-        public async Task ImportAccountDataToDB(int statementId, Task2Context context ,string filePath)
+        private async Task ImportBalanceSheetToDB(int statementId, Task2Context context ,string filePath)
         {
 
             try { 
-                List<AccountData> block = new List<AccountData>();
+                List<BalanceSheet> block = new List<BalanceSheet>();
 
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
@@ -406,7 +406,7 @@ namespace B1_Test_Task.Services
 
                         if (row != null) // null cell values may cause null reference exceptions
                         {
-                            AccountData entity = new AccountData
+                            BalanceSheet entity = new BalanceSheet
                             {
                                 IncomingBalanceAsset = row.GetCell(INCOMING_BALANCE_ASSET_COLUMN).NumericCellValue,
                                 IncomingBalanceLiability = row.GetCell(INCOMING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
