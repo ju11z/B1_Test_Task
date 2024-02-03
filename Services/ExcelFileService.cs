@@ -5,6 +5,7 @@ using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -43,12 +44,22 @@ namespace B1_Test_Task.Services
         {
             ISheet sheet = workBoook.GetSheetAt(0);
 
+            try { 
+
             await ImportFirstLevelAccountToDB(sheet, context);
 
                 await ImportSecondLevelAccountToDB(sheet, context);
 
                 await ImportThirdLevelAccountToDB(sheet, context);
-                
+
+            }
+            catch(Exception e)
+            {
+                ExceptionNotifier.NotifyAboutException("adsdfgdfg");
+
+            }
+
+
         }
 
         public async Task<string> ImportDataToDB(Task2Context context, string filePath)
@@ -132,7 +143,10 @@ namespace B1_Test_Task.Services
             
         }
            
-
+        private bool AccountCodeIsUnique(int code, Task2Context context)
+        {
+            return context.Accounts.Where(a => a.Code == code).ToList().Count < 1;
+        }
         
 
         private async Task ImportFirstLevelAccountToDB(ISheet sheet, Task2Context context)
@@ -161,19 +175,26 @@ namespace B1_Test_Task.Services
                             {
                                 code = Int32.Parse(match.Value);
                             }
+
+                            if (!AccountCodeIsUnique(code, context))
+                                continue;
+
                             Account entity = new Account
                             {
                                 ParentId = 0,
                                 Code = code,
                                 Title=value
                             };
-
+                           
                             context.Accounts.Add(entity);
+                            await context.SaveChangesAsync();
+
+
                         }
                     }
                 }
+                
 
-                await context.SaveChangesAsync();
             });
         }
 
@@ -230,13 +251,19 @@ namespace B1_Test_Task.Services
                             
                             int parentId = FindFirstLevelParentId(value, parents);
                             int code = Int32.Parse(value);
+
+                            if (!AccountCodeIsUnique(code, context))
+                                continue;
+
                             Account entity = new Account
                             {
                                 ParentId = parentId,
                                 Code = code
                             };
+                            
+                                context.Accounts.Add(entity);
+                            await context.SaveChangesAsync();
 
-                            context.Accounts.Add(entity);
                         }
                     }
                 }
@@ -244,7 +271,7 @@ namespace B1_Test_Task.Services
                 
             });
             
-            await context.SaveChangesAsync();
+
         }
 
         private async Task ImportThirdLevelAccountToDB(ISheet sheet, Task2Context context)
@@ -271,6 +298,10 @@ namespace B1_Test_Task.Services
                         if (matches.Count == 1)
                         {
                             int code= Int32.Parse(value);
+
+                            if (!AccountCodeIsUnique(code, context))
+                                continue;
+
                             int parentId = FindSecondLevelParentId(value, parents);
                             Account entity = new Account
                             {
@@ -278,7 +309,11 @@ namespace B1_Test_Task.Services
                                 Code = code
                             };
 
-                            context.Accounts.Add(entity);
+                            
+                                context.Accounts.Add(entity);
+                            await context.SaveChangesAsync();
+
+
                         }
                     }
                 }
@@ -286,7 +321,6 @@ namespace B1_Test_Task.Services
 
             });
 
-            await context.SaveChangesAsync();
         }
 
         private bool ValidateSheet(ISheet sheet, string filePath)

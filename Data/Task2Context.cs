@@ -21,6 +21,23 @@ namespace B1_Test_Task.Data
             : base("name=Task2Context")
         {
         }
+        /*
+
+        public class Initializer : IDatabaseInitializer<DbContext>
+        {
+            public void InitializeDatabase(DbContext context)
+            {
+                if (context.Database.Exists() && !context.Database.CompatibleWithModel(false))
+                    context.Database.Delete();
+
+                if (!context.Database.Exists())
+                {
+                    context.Database.Create();
+                    context.Database.ExecuteSqlCommand("alter table Accounts add constraint AccountCodeUnique unique (Code)");
+                }
+            }
+        }
+        */
 
         // Add a DbSet for each entity type that you want to include in your model. For more information 
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
