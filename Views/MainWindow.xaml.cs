@@ -24,5 +24,6 @@ namespace B1_Test_Task.Views
         {
             InitializeComponent();
         }
+
     }
 }

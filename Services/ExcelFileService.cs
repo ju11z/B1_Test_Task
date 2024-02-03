@@ -423,7 +423,7 @@ namespace B1_Test_Task.Services
 
                         if (i % IMPORT_BLOCK_SIZE == 0)
                         {
-                            context.AccountData.AddRange(block);
+                            context.BalanceSheets.AddRange(block);
                             await context.SaveChangesAsync();
                             block.Clear();
                         }

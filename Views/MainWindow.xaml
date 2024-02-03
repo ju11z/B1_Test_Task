@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:B1_Test_Task"
         xmlns:vm="clr-namespace:B1_Test_Task.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="B1 test task" Height="450" Width="800">
     <Window.DataContext>
         <vm:MainWindowViewModel></vm:MainWindowViewModel>
     </Window.DataContext>
@@ -32,10 +33,53 @@
                     <TextBlock Text="Task 2"></TextBlock>
                 </TabItem.Header>
                 <Grid>
-                    <Button Content="Upload file" Command="{Binding Task2ViewModel.UploadExcelFileCommand}" HorizontalAlignment="Left" Margin="31,28,0,0" VerticalAlignment="Top" Width="75"/>
-                    <ListBox ItemsSource="{Binding Task2ViewModel.FilePaths, UpdateSourceTrigger=PropertyChanged}" Margin="31,74,324.667,221"></ListBox>
-                    <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,186,0,0" VerticalAlignment="Top" Width="75" Command="{Binding Task2ViewModel.ImportFilesToDBCommand}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="31,222,0,0" TextWrapping="Wrap" Text="{Binding Task2ViewModel.ImportState, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
+                    <TabControl>
+                        <TabItem>
+                            <TabItem.Header>
+                                <TextBlock Text="Upload file"></TextBlock></TabItem.Header>
+                            <Grid>
+                                <Button Content="Upload file" Command="{Binding Task2ViewModel.UploadExcelFileCommand}" HorizontalAlignment="Left" Margin="31,28,0,0" VerticalAlignment="Top" Width="75"/>
+                                <ListBox ItemsSource="{Binding Task2ViewModel.FilePaths, UpdateSourceTrigger=PropertyChanged}" Margin="31,74,324.667,221"></ListBox>
+                                <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,186,0,0" VerticalAlignment="Top" Width="75" Command="{Binding Task2ViewModel.ImportFilesToDBCommand}"/>
+                                <TextBlock HorizontalAlignment="Left" Margin="31,222,0,0" TextWrapping="Wrap" Text="{Binding Task2ViewModel.ImportState, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem>
+                            <TabItem.Header>
+                                <TextBlock Text="Balance sheets"></TextBlock>
+                            </TabItem.Header>
+                            <Grid>
+                                
+                                <ListView ItemsSource="{Binding Task2ViewModel.BalanceSheets, UpdateSourceTrigger=PropertyChanged}" Margin="153,0,0,147.333">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn  Header="Account code" Width="120" DisplayMemberBinding="{Binding AccCode}" />
+                                            <GridViewColumn Header="Incoming balance asset" Width="50" DisplayMemberBinding="{Binding IncomingBalanceAsset}" />
+                                            <GridViewColumn Header="Turnover debet" Width="50" DisplayMemberBinding="{Binding TurnoverDebet}" />
+                                            <GridViewColumn Header="Turnover credit" Width="50" DisplayMemberBinding="{Binding TurnoverCredit}" />
+                                            <GridViewColumn Header="Outgoing balance asset" Width="50" DisplayMemberBinding="{Binding OutgoingBalanceAsset}" />
+                                            <GridViewColumn Header="Outgoing balance liability" Width="50" DisplayMemberBinding="{Binding OutgoingBalanceLiability}" />
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+
+                                <ComboBox ItemsSource="{Binding Task2ViewModel.Statements}" SelectedItem="{Binding Task2ViewModel.SelectedStatement, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  DisplayMemberPath="{Binding StatementTitle, UpdateSourceTrigger=PropertyChanged}" Margin="17,59,643,268.333" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding StatementTitle}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding Task2ViewModel.LoadStatementsCommand}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                    
                 </Grid>
             </TabItem>
             
