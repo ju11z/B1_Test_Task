@@ -32,6 +32,11 @@ namespace B1_Test_Task.Services
         private const int OUTGOING_BALANCE_ASSET_COLUMN = 5;
         private const int OUTGOING_BALANCE_LIABILITY_COLUMN = 6;
 
+        private const int STATEMENT_BANK_TITLE_ROW = 0;
+        private const int STATEMENT_BANK_TITLE_COLUMN = 1;
+        private const int STATEMENT_TITLE_ROW = 1;
+        private const int STATEMENT_PERIOD_ROW = 2;
+
         private IWorkbook workBoook;
 
         public async Task ImportAccountsToDB(Task2Context context, string filePath)
@@ -62,10 +67,10 @@ namespace B1_Test_Task.Services
                 return $" error occured while importing {filePath}";
             }
 
-
-            var importaccountstodb = ImportAccountsToDB(new Task2Context(), filePath);
+            ImportStatementToDB(sheet, context);
+            var importaccountstodb = ImportAccountsToDB(context, filePath);
             await importaccountstodb;
-            var importaccountdatatodb = ImportAccountDataToDB(new Task2Context(), filePath);
+            var importaccountdatatodb = ImportAccountDataToDB(context, filePath);
             await importaccountdatatodb;
 
             //string importResult = $"{filePath} imported successfully";
@@ -88,6 +93,43 @@ namespace B1_Test_Task.Services
                 }
             }
         }
+
+        private void ImportStatementToDB(ISheet sheet, Task2Context context)
+        {
+            string bankTitle = sheet.GetRow(STATEMENT_BANK_TITLE_ROW).GetCell(STATEMENT_BANK_TITLE_COLUMN).StringCellValue;
+            string statementTitle = sheet.GetRow(STATEMENT_TITLE_ROW).GetCell(0).StringCellValue;
+            string dateRowValue = sheet.GetRow(STATEMENT_PERIOD_ROW).GetCell(0).StringCellValue;
+
+            string pattern = @"\b\d{2}\.\d{2}\.\d{4}\b";
+
+            MatchCollection dateMatches = Regex.Matches(dateRowValue, pattern);
+
+            string firstDate="";
+            string lastDate="";
+
+            if (dateMatches.Count > 1)
+            {
+                firstDate = dateMatches[0].Value;
+                lastDate = dateMatches[1].Value;
+            }
+
+            DateTime periodStart= DateTime.ParseExact(firstDate, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime periodEnd = DateTime.ParseExact(lastDate, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+
+            Statement statement = new Statement
+            {
+                BankTitle=bankTitle,
+                StatementTitle=statementTitle,
+                PeriodStart=periodStart,
+                PeriodEnd=periodEnd
+            };
+
+            context.Statements.Add(statement);
+            context.SaveChanges();
+
+            
+        }
+           
 
         
 
