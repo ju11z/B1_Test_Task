@@ -67,10 +67,10 @@ namespace B1_Test_Task.Services
                 return $" error occured while importing {filePath}";
             }
 
-            ImportStatementToDB(sheet, context);
+            int statementId = ImportStatementToDB(sheet, context);
             var importaccountstodb = ImportAccountsToDB(context, filePath);
             await importaccountstodb;
-            var importaccountdatatodb = ImportAccountDataToDB(context, filePath);
+            var importaccountdatatodb = ImportAccountDataToDB(statementId, context, filePath);
             await importaccountdatatodb;
 
             //string importResult = $"{filePath} imported successfully";
@@ -94,7 +94,7 @@ namespace B1_Test_Task.Services
             }
         }
 
-        private void ImportStatementToDB(ISheet sheet, Task2Context context)
+        private int ImportStatementToDB(ISheet sheet, Task2Context context)
         {
             string bankTitle = sheet.GetRow(STATEMENT_BANK_TITLE_ROW).GetCell(STATEMENT_BANK_TITLE_COLUMN).StringCellValue;
             string statementTitle = sheet.GetRow(STATEMENT_TITLE_ROW).GetCell(0).StringCellValue;
@@ -126,6 +126,8 @@ namespace B1_Test_Task.Services
 
             context.Statements.Add(statement);
             context.SaveChanges();
+
+            return statement.Id;
 
             
         }
@@ -338,7 +340,7 @@ namespace B1_Test_Task.Services
             
         }
 
-        public async Task ImportAccountDataToDB(Task2Context context ,string filePath)
+        public async Task ImportAccountDataToDB(int statementId, Task2Context context ,string filePath)
         {
             try { 
                 List<AccountData> block = new List<AccountData>();
@@ -379,7 +381,8 @@ namespace B1_Test_Task.Services
                                 TurnoverDebet = row.GetCell(TURNOVER_DEBET_COLUMN).NumericCellValue,
                                 TurnoverCredit = row.GetCell(TURNOVER_CREDIT_COLUMN).NumericCellValue,
                                 OutgoingBalanceAsset = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN).NumericCellValue,
-                                OutgoingBalanceLiability = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue
+                                OutgoingBalanceLiability = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
+                                StatementId=statementId
                             };
 
                             block.Add(entity);
