@@ -15,11 +15,8 @@ using System.Threading.Tasks;
 
 namespace B1_Test_Task.Services
 {
-    
     public class ExcelFileService
     {
-
-        
         private const int IMPORT_BLOCK_SIZE = 10;
 
         private const int ACCOUNT_DATA_START_ROW = 9;
@@ -40,17 +37,17 @@ namespace B1_Test_Task.Services
 
         private IWorkbook workBoook;
 
-        private async Task ImportAccountsToDB(Task2Context context, string filePath)
+        private async Task ImportAccountsToDBAsync(Task2Context context, string filePath)
         {
             ISheet sheet = workBoook.GetSheetAt(0);
 
             try { 
 
-            await ImportFirstLevelAccountToDB(sheet, context);
+            await ImportFirstLevelAccountToDBAsync(sheet, context);
 
-                await ImportSecondLevelAccountToDB(sheet, context);
+                await ImportSecondLevelAccountToDBAsync(sheet, context);
 
-                await ImportThirdLevelAccountToDB(sheet, context);
+                await ImportThirdLevelAccountToDBAsync(sheet, context);
 
             }
             catch(Exception e)
@@ -58,11 +55,9 @@ namespace B1_Test_Task.Services
                 return;
 
             }
-
-
         }
 
-        public async Task<string> ImportDataToDB(Task2Context context, string filePath)
+        public async Task<string> ImportDataToDBAsync(Task2Context context, string filePath)
         {
             InitWorkBook(filePath);
 
@@ -79,9 +74,9 @@ namespace B1_Test_Task.Services
             }
 
             int statementId = ImportStatementToDB(sheet, context);
-            var importaccountstodb = ImportAccountsToDB(context, filePath);
+            var importaccountstodb = ImportAccountsToDBAsync(context, filePath);
             await importaccountstodb;
-            var importaccountdatatodb = ImportBalanceSheetToDB(statementId, context, filePath);
+            var importaccountdatatodb = ImportBalanceSheetToDBAsync(statementId, context, filePath);
             await importaccountdatatodb;
 
             //string importResult = $"{filePath} imported successfully";
@@ -149,7 +144,7 @@ namespace B1_Test_Task.Services
         }
         
 
-        private async Task ImportFirstLevelAccountToDB(ISheet sheet, Task2Context context)
+        private async Task ImportFirstLevelAccountToDBAsync(ISheet sheet, Task2Context context)
         {
             string pattern = @"\d+";
             int code=0;
@@ -200,8 +195,6 @@ namespace B1_Test_Task.Services
 
         private int FindFirstLevelParentId(string childValue, List<Account> parents)
         {
-            int parentId = 0;
-
             Account account = parents.Find(p => p.Code.ToString().Contains(childValue[0]));
 
             if (account != null)
@@ -213,7 +206,6 @@ namespace B1_Test_Task.Services
 
         private int FindSecondLevelParentId(string childValue, List<Account> parents)
         {
-            int parentId = 0;
             List<Account> secondLevelParents = parents.Where(p => p.Code.ToString().Length > 1).ToList();
 
             Account account = secondLevelParents.Find(p => p.Code.ToString().Substring(0,2)==childValue.Substring(0, 2));
@@ -225,7 +217,7 @@ namespace B1_Test_Task.Services
 
         }
 
-        private async Task ImportSecondLevelAccountToDB(ISheet sheet, Task2Context context)
+        private async Task ImportSecondLevelAccountToDBAsync(ISheet sheet, Task2Context context)
         {
             
             string pattern = @"\b\d{2}\b";
@@ -274,7 +266,7 @@ namespace B1_Test_Task.Services
 
         }
 
-        private async Task ImportThirdLevelAccountToDB(ISheet sheet, Task2Context context)
+        private async Task ImportThirdLevelAccountToDBAsync(ISheet sheet, Task2Context context)
         {
 
             string pattern = @"\b\d{4}\b";
@@ -386,7 +378,7 @@ namespace B1_Test_Task.Services
             
         }
 
-        private async Task ImportBalanceSheetToDB(int statementId, Task2Context context ,string filePath)
+        private async Task ImportBalanceSheetToDBAsync(int statementId, Task2Context context ,string filePath)
         {
 
             try { 
@@ -415,7 +407,7 @@ namespace B1_Test_Task.Services
                                 OutgoingBalanceAsset = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN).NumericCellValue,
                                 OutgoingBalanceLiability = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
                                 StatementId=statementId,
-                                AccountId= await FindAccountIdByValue(Int32.Parse(row.GetCell(ACCOUNT_COLUMN).ToString()), context)
+                                AccountId= await FindAccountIdByValueAsync(Int32.Parse(row.GetCell(ACCOUNT_COLUMN).ToString()), context)
                             };
 
                             block.Add(entity);
@@ -439,10 +431,10 @@ namespace B1_Test_Task.Services
             
         }
 
-        private async Task<int> FindAccountIdByValue(int code, Task2Context context)
+        private async Task<int> FindAccountIdByValueAsync(int code, Task2Context context)
         {
             List<Account> accounts = context.Accounts.ToList();
-            int id= await Task.Run(async () => accounts.Find(a => a.Code == code).Id);
+            int id= await Task.Run(() => accounts.Find(a => a.Code == code).Id);
             if (id != null)
                 return id;
             return 0;

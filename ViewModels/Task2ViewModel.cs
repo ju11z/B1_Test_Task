@@ -69,7 +69,7 @@ namespace B1_Test_Task.ViewModels
 
         public BaseCommand UploadExcelFileCommand { get; }
 
-        private async void UploadExcelFileCommandExecuted(object c)
+        private void UploadExcelFileCommandExecuted(object c)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.FileName = "Document"; // Default file name
@@ -120,7 +120,7 @@ namespace B1_Test_Task.ViewModels
                 foreach (string filePath in filePaths)
                 {
                     
-                    var importResult = await service.ImportDataToDB(new Task2Context(), filePath);
+                    var importResult = await service.ImportDataToDBAsync(new Task2Context(), filePath);
 
                     Task2Status += $"\n{importResult}";
                     
@@ -148,7 +148,7 @@ namespace B1_Test_Task.ViewModels
 
         public BaseCommand LoadStatementsCommand { get; }
 
-        private async void LoadStatementsCommandExecuted(object c)
+        private void LoadStatementsCommandExecuted(object c)
         {
             
             BalanceSheets = new ObservableCollection<AccountJoinBalanceSheet>(repository.GetAccountInnerJoinBalanceSheet(SelectedStatement.Id));
