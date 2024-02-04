@@ -12,6 +12,6 @@ namespace B1_Test_Task.Models.Task_1
         public string RanLatin { get; set; }
         public string RanCyrillic { get; set; }
         public uint RanUint{ get; set; }
-        public double RanDecimal { get; set; }
+        public float RanDecimal { get; set; }
     }
 }

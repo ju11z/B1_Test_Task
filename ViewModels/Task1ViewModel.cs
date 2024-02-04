@@ -16,8 +16,9 @@ namespace B1_Test_Task.ViewModels
     {
         #region PROPERTIES
 
-        const int FILES_AMOUNT = 10;
+        const int FILES_AMOUNT = 20;
         const int ROWS_IN_FILE_AMOUNT = 100000;
+
 
         private Random random = new Random();
         private XMLFileService fileService = new XMLFileService();
@@ -31,7 +32,10 @@ namespace B1_Test_Task.ViewModels
         private int rowsImportedToDBCount;
         public int RowsImportedToDBCount { get => rowsImportedToDBCount; set => Set(ref rowsImportedToDBCount, value); }
 
+        private bool operationIsRunning;
 
+        private bool filesAreGenerated;
+        private bool filesAreConcatenated;
 
         public bool FilesAreCreating { get => filesAreCreating; set => Set(ref filesAreCreating, value); }
         private bool filesAreCreating;
@@ -59,7 +63,9 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnGenerateFilesCommandExecuted(object c)
         {
-            FilesAreCreating = true;
+            FilesCreatedAmount = 0;
+            operationIsRunning = true;
+
             for(int i=0; i< FILES_AMOUNT; i++)
             {
                 string fileName = $"data_{i+1}.xml";
@@ -67,15 +73,17 @@ namespace B1_Test_Task.ViewModels
                 await GenerateFileData(fileName);
                 FilesCreatedAmount++;
             }
-            FilesAreCreating = false;
-            GenerateFilesCommand.RaiseCanExecuteChanged();
+            operationIsRunning = false;
+            filesAreGenerated = true;
+
+            RaiseCommandsCanExecuteCnaged();
 
         }
 
         private bool CanGenerateFilesCommandExecute(object c)
         {
             
-            return !FilesAreCreating;
+            return !operationIsRunning;
 
         }
         #endregion
@@ -88,12 +96,18 @@ namespace B1_Test_Task.ViewModels
         private async void OnConcatenateFilesCommandExecuted(object c)
         {
             //FilesAreCreating = true;
+            operationIsRunning = true;
             
             Task t = fileService.DeleteRowsAsync(fileNames, DeleteSubstring);
             await t;
             ConcatenateProcessState = "concatenating files...";
             await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
             ConcatenateProcessState = "finished concatenating files!";
+
+            operationIsRunning = false;
+            filesAreConcatenated = true;
+
+            RaiseCommandsCanExecuteCnaged();
 
         }
 
@@ -102,7 +116,7 @@ namespace B1_Test_Task.ViewModels
         private bool CanConcatenateFilesCommandExecute(object c)
         {
 
-            return true;
+            return !operationIsRunning&&filesAreGenerated;
 
         }
         #endregion
@@ -114,16 +128,19 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnImportDataToDBCommandExecuted(object c)
         {
+            operationIsRunning = true;
             await fileService.ImportDataToDB(context,"data_common.xml");
+            operationIsRunning = false;
+
+            RaiseCommandsCanExecuteCnaged();
 
         }
-
 
 
         private bool CanImportDataToDBCommandExecute(object c)
         {
 
-            return true;
+            return !operationIsRunning&&filesAreConcatenated;
 
         }
         #endregion
@@ -229,10 +246,10 @@ namespace B1_Test_Task.ViewModels
             return (uint)random.Next(1, 50000000) * 2;
         }
 
-        private double GenerateRandomDecimal()
+        private float GenerateRandomDecimal()
         {
-            double randomValue = random.NextDouble() * 19 + 1; // generates a random value between 1 and 20
-            return Math.Round(randomValue, 8); // rounds the value to 8 decimal places
+            float randomValue = (float)random.NextDouble() * 19 + 1; // generates a random value between 1 and 20
+            return (float)Math.Round(randomValue, 8); // rounds the value to 8 decimal places
         }
 
         private void UpdateRowsDeletedCount()
@@ -243,6 +260,13 @@ namespace B1_Test_Task.ViewModels
         private void UpdateRowsImportedToDBCount(int amount)
         {
             RowsImportedToDBCount+=amount;
+        }
+
+        private void RaiseCommandsCanExecuteCnaged()
+        {
+            GenerateFilesCommand.RaiseCanExecuteChanged();
+            ConcatenateFilesCommand.RaiseCanExecuteChanged();
+            ImportDataToDBCommand.RaiseCanExecuteChanged();
         }
 
         #endregion
