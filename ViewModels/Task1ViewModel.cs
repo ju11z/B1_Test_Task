@@ -16,7 +16,7 @@ namespace B1_Test_Task.ViewModels
     {
         #region PROPERTIES
 
-        const int FILES_AMOUNT = 20;
+        const int FILES_AMOUNT = 3;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Task1ContextRepository repository;

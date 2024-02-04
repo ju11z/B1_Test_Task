@@ -25,7 +25,7 @@
                     <TextBox HorizontalAlignment="Left" Margin="366,112,0,0" Text="{Binding Task1ViewModel.DeleteSubstring, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                     <TextBlock HorizontalAlignment="Left" Margin="199,146,0,0" Text="{Binding Task1ViewModel.RowsDeletedAmount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
                     <Button Content="Import to DB" HorizontalAlignment="Left" Margin="31,171,0,0" VerticalAlignment="Top" Width="98" Command="{Binding Task1ViewModel.ImportDataToDBCommand}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="108,251,0,0" Text="{Binding Task1ViewModel.FilesConcatenatedCount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="533,114,0,0" Text="{Binding Task1ViewModel.FilesConcatenatedCount, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top"/>
                     <Button Content="Calculate summ and median" HorizontalAlignment="Left" Margin="31,251,0,0" VerticalAlignment="Top" Width="181" Command="{Binding Task1ViewModel.CalculateSummAndMedianCommand}"/>
                     <TextBlock HorizontalAlignment="Left" Margin="460,311,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding Task1ViewModel.IntSumm, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
                     <TextBlock HorizontalAlignment="Left" Margin="134,297,0,0" TextWrapping="Wrap" Text="{Binding Task1ViewModel.DecimalMedian, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>

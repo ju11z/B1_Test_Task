@@ -118,7 +118,12 @@ namespace B1_Test_Task.Services
 
         public async Task ConcatenateXmlFilesAsync(List<string> fileNames, string outputFileName)
         {
-
+            
+            if (File.Exists(outputFileName))
+            {
+                File.Delete(outputFileName);
+                Console.WriteLine("XML file deleted successfully.");
+            }
 
             XmlDocument concatenatedDocument = new XmlDocument();
 
@@ -209,44 +214,19 @@ namespace B1_Test_Task.Services
             */
         }
         
-        public async Task ConcatenateXmlFilesAsyncOld(List<string> fileNames, string outputFileName)
-        {
-
-            try
-            {
-                XDocument combinedXml = XDocument.Load(fileNames[0]);
-
-                for (int i = 1; i < fileNames.Count; i++)
-                {
-                    XDocument nextXml = XDocument.Load(fileNames[i]);
-                    combinedXml.Root.Add(nextXml.Root.Descendants());
-                }
-
-                await Task.Run(() =>
-                {
-                    combinedXml.Save(outputFileName);
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error concatenating XML files: " + ex.Message);
-                throw;
-            }
-
-
-            //await Task.Delay(5000);
-        }
+        
 
         public async Task ImportDataToDB(Task1Context context, string filePath)
         {
             List<Row> rows = await ReadDataFromFileAsync(filePath);
 
             List<Row> block = new List<Row>();
+
             await Task.Run(() =>
             {
-                for (int i = 0; i < rows.Count; i++)
+                for (int i = 1; i < rows.Count+1; i++)
                 {
-                    block.Add(rows[i]);
+                    block.Add(rows[i-1]);
 
                     if (i % IMPORT_BLOCK_SIZE == 0)
                     {
