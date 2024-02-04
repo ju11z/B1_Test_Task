@@ -16,7 +16,7 @@ namespace B1_Test_Task.ViewModels
     {
         #region PROPERTIES
 
-        const int FILES_AMOUNT = 3;
+        const int FILES_AMOUNT = 10;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Task1ContextRepository repository;
@@ -37,6 +37,7 @@ namespace B1_Test_Task.ViewModels
 
         private bool filesAreGenerated;
         private bool filesAreConcatenated;
+        private bool filesAreImported;
 
         public bool FilesAreCreating { get => filesAreCreating; set => Set(ref filesAreCreating, value); }
         private bool filesAreCreating;
@@ -47,6 +48,18 @@ namespace B1_Test_Task.ViewModels
         public string ConcatenateProcessState { get=>concatenateProcessState; set=>Set(ref concatenateProcessState,value); }
 
         public string DeleteSubstring { get; set; }
+
+        public string Task1Status { get => task1Status; set => Set(ref task1Status, value); }
+        private string task1Status;
+
+        private int progressBarMin;
+        public int ProgressBarMin { get => progressBarMin; set => Set(ref progressBarMin, value); }
+
+        private int progressBarMax;
+        public int ProgressBarMax { get => progressBarMax; set => Set(ref progressBarMax, value); }
+
+        private int progressBarValue;
+        public int ProgressBarValue { get => progressBarValue; set => Set(ref progressBarValue, value); }
 
         public int FilesConcatenatedCount { get=>filesConcatenatedCount; set=>Set(ref filesConcatenatedCount, value); }
         private int filesConcatenatedCount;
@@ -59,6 +72,8 @@ namespace B1_Test_Task.ViewModels
         private float decimalMedian;
 
         private Task1Context context;
+
+        enum RadioOptions { Option1, Option2 }
 
         //private Task1Context context;
 
@@ -74,6 +89,9 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnGenerateFilesCommandExecuted(object c)
         {
+            ProgressBarMin = 0;
+            ProgressBarMax = FILES_AMOUNT;
+
             FilesCreatedAmount = 0;
             operationIsRunning = true;
 
@@ -83,6 +101,10 @@ namespace B1_Test_Task.ViewModels
                 fileNames.Add(fileName);
                 await GenerateFileData(fileName);
                 FilesCreatedAmount++;
+
+                ProgressBarValue = FilesCreatedAmount;
+                Task1Status = $"generated {FilesCreatedAmount}/{FILES_AMOUNT} files";
+                
             }
             operationIsRunning = false;
             filesAreGenerated = true;
@@ -106,17 +128,23 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnConcatenateFilesCommandExecuted(object c)
         {
+            ProgressBarMin = 0;
+            ProgressBarMax = FILES_AMOUNT;
             //FilesAreCreating = true;
+            Task1Status = "start concatenate files";
             operationIsRunning = true;
             
             Task t = fileService.DeleteRowsAsync(fileNames, DeleteSubstring);
             await t;
             ConcatenateProcessState = "concatenating files...";
+            //await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
             await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
             ConcatenateProcessState = "finished concatenating files!";
 
             operationIsRunning = false;
             filesAreConcatenated = true;
+
+            Task1Status = "finish concatenate files";
 
             RaiseCommandsCanExecuteCnaged();
 
@@ -139,11 +167,18 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnImportDataToDBCommandExecuted(object c)
         {
+            ProgressBarMin = 0;
+            ProgressBarMax = FILES_AMOUNT*ROWS_IN_FILE_AMOUNT;
+            Task1Status = "start importing data to database";
+
             operationIsRunning = true;
             await fileService.ImportDataToDB(context,"data_common.xml");
             operationIsRunning = false;
+            filesAreImported = true;
 
             RaiseCommandsCanExecuteCnaged();
+
+            Task1Status = "succesfully imported data to database";
 
         }
 
@@ -166,13 +201,15 @@ namespace B1_Test_Task.ViewModels
             IntSumm = repository.GetIntSumm();
             DecimalMedian = repository.GetFloatMedian();
 
+            Task1Status = $"summ of integer : {intSumm}; median of decimals: {DecimalMedian}";
+
         }
 
 
         private bool CanCalculateSummAndMedianCommandExecute(object c)
         {
 
-            return true;
+            return !operationIsRunning && filesAreImported;
 
         }
         #endregion
@@ -195,6 +232,8 @@ namespace B1_Test_Task.ViewModels
             fileService.RowDeleted += UpdateRowsDeletedCount;
             fileService.OneFileConcatenated += UpdateFileConcatenatedCount;
             fileService.RowImportedToDB += UpdateRowsImportedToDBCount;
+
+            ProgressBarValue = 0;
         }
 
         #endregion
@@ -290,17 +329,25 @@ namespace B1_Test_Task.ViewModels
         private void UpdateRowsDeletedCount()
         {
             RowsDeletedAmount++;
+            Task1Status = $"deleted {RowsDeletedAmount} rows";
+            
         }
 
         private void UpdateRowsImportedToDBCount(int amount)
         {
             RowsImportedToDBCount+=amount;
+            Task1Status = $"imported {RowsImportedToDBCount} rows to database";
+            ProgressBarValue = rowsImportedToDBCount;
         }
 
         private void UpdateFileConcatenatedCount()
         {
             FilesConcatenatedCount++;
+            Task1Status = $"concatenated {FilesConcatenatedCount} files";
+            ProgressBarValue = FilesConcatenatedCount;
         }
+
+       
 
         private void RaiseCommandsCanExecuteCnaged()
         {

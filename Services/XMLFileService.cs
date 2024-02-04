@@ -10,12 +10,16 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Collections;
 
 namespace B1_Test_Task.Services
 {
     class XMLFileService
     {
         private const int IMPORT_BLOCK_SIZE = 10000;
+
+        private const string XML_ROOT_ELEMENT_OPEN = "<?xml version=\"1.0\" encoding=\"utf-8\"?><ArrayOfRow xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">";
+        private const string XML_ROOT_ELEMENT_CLOSE = "</ArrayOfRow>";
 
         public Action OneFileConcatenated;
 
@@ -114,6 +118,38 @@ namespace B1_Test_Task.Services
             }
             
             await Task.CompletedTask;
+        }
+
+        public async Task ConcatenateXmlFilesWrongAsync(List<string> fileNames, string outputFileName)
+        {
+            if (File.Exists(outputFileName))
+            {
+                File.Delete(outputFileName);
+                Console.WriteLine("XML file deleted successfully.");
+            }
+
+            await Task.Run(() => {
+                using (StreamWriter writer = new StreamWriter(outputFileName))
+                {
+                    writer.Write(XML_ROOT_ELEMENT_OPEN);
+
+                    foreach (string file in fileNames)
+                    {
+                        string fileText = File.ReadAllText(file);
+
+                        fileText = fileText.Replace(XML_ROOT_ELEMENT_OPEN, "");
+                        fileText = fileText.Replace(XML_ROOT_ELEMENT_CLOSE, "");
+
+                        writer.Write(fileText); // Concatenate the text from each file and write to the output file
+
+                        OneFileConcatenated.Invoke();
+                    }
+
+                    writer.Write(XML_ROOT_ELEMENT_CLOSE);
+                }
+            });
+
+            
         }
 
         public async Task ConcatenateXmlFilesAsync(List<string> fileNames, string outputFileName)
@@ -220,13 +256,60 @@ namespace B1_Test_Task.Services
         {
             List<Row> rows = await ReadDataFromFileAsync(filePath);
 
-            List<Row> block = new List<Row>();
+
+            //array realization
+
+
+            /*Row[] block = new Row[IMPORT_BLOCK_SIZE];
+            int cutBlock;
 
             await Task.Run(() =>
             {
-                for (int i = 1; i < rows.Count+1; i++)
+                int i = 1;
+                foreach (var row in rows)
                 {
-                    block.Add(rows[i-1]);
+                    
+                    cutBlock = i % IMPORT_BLOCK_SIZE;
+                    block[cutBlock] = row;
+
+                    if (cutBlock == 0)
+                    {
+                        RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
+                        context.Rows.AddRange(block);
+                        context.SaveChanges();
+                        
+                    }
+                    i++;
+                }
+            });*/
+
+            //List realization
+            int cutBlock;
+            List<Row> block = new List<Row>();
+            await Task.Run(() =>
+            {
+                int i = 1;
+                foreach (var row in rows)
+                {
+
+                    cutBlock = i % IMPORT_BLOCK_SIZE;
+                    block.Add(row);
+
+                    if (cutBlock == 0)
+                    {
+                        RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
+                        context.Rows.AddRange(block);
+                        context.SaveChanges();
+                        block.Clear();
+                    }
+                    i++;
+                }/*
+                for (int i = 1; i < rows.Count + 1; i++)
+                {
+                    
+                    block.Add(rows[i - 1]);
+
+
 
                     if (i % IMPORT_BLOCK_SIZE == 0)
                     {
@@ -235,29 +318,14 @@ namespace B1_Test_Task.Services
                         context.SaveChanges();
                         block.Clear();
                     }
-                }
+                }*/
             });
-                /*
-            await Task.Run(() =>
-            {
-                {
-                    foreach (Row row in rows)
-                    {
-                        context.Rows.Add(row);
-                        RowImportedToDB?.Invoke();
-                        context.SaveChanges();
-                    }
-                }
-            }
-                );
-                */
 
-            
 
 
         }
 
-        
+
     }
 
     
