@@ -19,6 +19,7 @@ namespace B1_Test_Task.ViewModels
         const int FILES_AMOUNT = 20;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
+        private Task1ContextRepository repository;
 
         private Random random = new Random();
         private XMLFileService fileService = new XMLFileService();
@@ -46,6 +47,16 @@ namespace B1_Test_Task.ViewModels
         public string ConcatenateProcessState { get=>concatenateProcessState; set=>Set(ref concatenateProcessState,value); }
 
         public string DeleteSubstring { get; set; }
+
+        public int FilesConcatenatedCount { get=>filesConcatenatedCount; set=>Set(ref filesConcatenatedCount, value); }
+        private int filesConcatenatedCount;
+
+
+        public long IntSumm { get => intSumm; set => Set(ref intSumm, value); }
+        private long intSumm;
+
+        public float DecimalMedian { get => decimalMedian; set => Set(ref decimalMedian, value); }
+        private float decimalMedian;
 
         private Task1Context context;
 
@@ -145,6 +156,27 @@ namespace B1_Test_Task.ViewModels
         }
         #endregion
 
+        #region  CalculateSummAndMedianCommand
+
+
+        public BaseCommand CalculateSummAndMedianCommand { get; }
+
+        private async void OnCalculateSummAndMedianCommandExecuted(object c)
+        {
+            IntSumm = repository.GetIntSumm();
+            DecimalMedian = repository.GetFloatMedian();
+
+        }
+
+
+        private bool CanCalculateSummAndMedianCommandExecute(object c)
+        {
+
+            return true;
+
+        }
+        #endregion
+
 
         #endregion
         #region CONSTRUCTOR
@@ -154,11 +186,14 @@ namespace B1_Test_Task.ViewModels
             GenerateFilesCommand = new BaseCommand(OnGenerateFilesCommandExecuted, CanGenerateFilesCommandExecute);
             ConcatenateFilesCommand = new BaseCommand(OnConcatenateFilesCommandExecuted, CanConcatenateFilesCommandExecute);
             ImportDataToDBCommand = new BaseCommand(OnImportDataToDBCommandExecuted, CanImportDataToDBCommandExecute);
+            CalculateSummAndMedianCommand = new BaseCommand(OnCalculateSummAndMedianCommandExecuted, CanCalculateSummAndMedianCommandExecute);
+            repository = new Task1ContextRepository();
 
             context = new Task1Context();
 
 
             fileService.RowDeleted += UpdateRowsDeletedCount;
+            fileService.OneFileConcatenated += UpdateFileConcatenatedCount;
             fileService.RowImportedToDB += UpdateRowsImportedToDBCount;
         }
 
@@ -186,7 +221,7 @@ namespace B1_Test_Task.ViewModels
             row.RanDate = GenerateDateTime();
             row.RanLatin = GenerateLatinString();
             row.RanCyrillic = GenerateCyrillicString();
-            row.RanUint = GenerateRandomEvenInteger();
+            row.RanInt = GenerateRandomEvenInteger();
             row.RanDecimal = GenerateRandomDecimal();
 
             return row;
@@ -241,9 +276,9 @@ namespace B1_Test_Task.ViewModels
 
         }
 
-        public uint GenerateRandomEvenInteger()
+        public int GenerateRandomEvenInteger()
         {
-            return (uint)random.Next(1, 50000000) * 2;
+            return (int)random.Next(1, 50000000) * 2;
         }
 
         private float GenerateRandomDecimal()
@@ -260,6 +295,11 @@ namespace B1_Test_Task.ViewModels
         private void UpdateRowsImportedToDBCount(int amount)
         {
             RowsImportedToDBCount+=amount;
+        }
+
+        private void UpdateFileConcatenatedCount()
+        {
+            FilesConcatenatedCount++;
         }
 
         private void RaiseCommandsCanExecuteCnaged()

@@ -17,6 +17,8 @@ namespace B1_Test_Task.Services
     {
         private const int IMPORT_BLOCK_SIZE = 10000;
 
+        public Action OneFileConcatenated;
+
         public Action RowDeleted;
         public Action<int> RowImportedToDB;
         public void WriteDataToFile(List<Row> instances, string filePath)
@@ -76,6 +78,9 @@ namespace B1_Test_Task.Services
 
         public async Task DeleteRowsAsync(List<string> filePaths, string substring)
         {
+            if (substring == "")
+                return;
+
             foreach(string filePath in filePaths)
             {
                 
@@ -91,7 +96,7 @@ namespace B1_Test_Task.Services
                 foreach (Row row in oldRows)
                 {
                     
-                    if (substring!="" && (row.RanLatin.Contains(substring) || row.RanCyrillic.Contains(substring)))
+                    if (row.RanLatin.Contains(substring) || row.RanCyrillic.Contains(substring))
                     {
 
                         RowDeleted.Invoke();
@@ -113,13 +118,13 @@ namespace B1_Test_Task.Services
 
         public async Task ConcatenateXmlFilesAsync(List<string> fileNames, string outputFileName)
         {
-            /*
+
 
             XmlDocument concatenatedDocument = new XmlDocument();
 
             // Create the root element for the concatenated document
-            XmlElement rootElement = concatenatedDocument.CreateElement("ArrayOfRow");
-            concatenatedDocument.AppendChild(rootElement);
+            XmlElement rootArrayOfRow = concatenatedDocument.CreateElement("ArrayOfRow");
+            concatenatedDocument.AppendChild(rootArrayOfRow);
 
             // Iterate through the list of document paths
             foreach (string documentPath in fileNames)
@@ -128,18 +133,25 @@ namespace B1_Test_Task.Services
                 XmlDocument doc = new XmlDocument();
                 await Task.Run(() => doc.Load(documentPath));
 
-                // Get the root element of the loaded document
-                XmlElement documentRootElement = await Task.Run(() => doc.DocumentElement);
+                // Get all the "Row" elements from the current document
+                XmlNodeList rowElements = doc.GetElementsByTagName("Row");
 
-                // Import the root element of the loaded document into the concatenated document
-                XmlNode importedNode = await Task.Run(() => concatenatedDocument.ImportNode(documentRootElement, true));
-                await Task.Run(() => rootElement.AppendChild(importedNode));
+                // Append each "Row" element to the root element of the concatenated document
+                foreach (XmlNode rowElement in rowElements)
+                {
+                    XmlNode importedNode = concatenatedDocument.ImportNode(rowElement, true);
+                    rootArrayOfRow.AppendChild(importedNode);
+                }
+
+                await Task.Run(() => concatenatedDocument.Save(outputFileName));
+
+                OneFileConcatenated.Invoke();
             }
 
             // Save the concatenated document to the output filename
-            await Task.Run(() => concatenatedDocument.Save(outputFileName));
-            */
+            
 
+            /*
             XmlDocument concatenatedDocument = new XmlDocument();
 
             // Create the root element for the concatenated document
@@ -153,17 +165,48 @@ namespace B1_Test_Task.Services
                 XmlDocument doc = new XmlDocument();
                 await Task.Run(() => doc.Load(documentPath));
 
-                // Get the child nodes of the loaded document and append them to the root element of the concatenated document
+                // Create a new node for each loaded document and append it to the root element of the concatenated document
+                XmlNode importedNode = await Task.Run(() => concatenatedDocument.ImportNode(doc.DocumentElement, true));
+                await Task.Run(() => rootElement.AppendChild(importedNode));
+
+                await Task.Run(() => concatenatedDocument.Save(outputFileName));
+
+                OneFileConcatenated.Invoke();
+
+            }
+            */
+
+            // Save the concatenated document to the output filename
+            //concatenatedDocument.Save(outputFileName);
+
+            /*
+            XmlDocument concatenatedDocument = new XmlDocument();
+
+            
+            XmlElement rootElement = concatenatedDocument.CreateElement("ArrayOfRow");
+            concatenatedDocument.AppendChild(rootElement);
+
+            foreach (string documentPath in fileNames)
+            {
+                XmlDocument doc = new XmlDocument();
+                await Task.Run(() => doc.Load(documentPath));
+
+                List<XmlNode> nodes = new List<XmlNode>();
+
                 foreach (XmlNode node in doc.DocumentElement.ChildNodes)
                 {
                     XmlNode importedNode = await Task.Run(() => concatenatedDocument.ImportNode(node, true));
-                    await Task.Run(() => rootElement.AppendChild(importedNode));
+                    nodes.Add(importedNode);
+                    //await Task.Run(() => rootElement.AppendChild(importedNode));
+
                 }
+                await Task.Run(() => rootElement.AppendChild(nodes));
+                //await Task.Run(() => rootElement.);
+
             }
 
-            // Save the concatenated document to the output filename
             concatenatedDocument.Save(outputFileName);
-
+            */
         }
         
         public async Task ConcatenateXmlFilesAsyncOld(List<string> fileNames, string outputFileName)
