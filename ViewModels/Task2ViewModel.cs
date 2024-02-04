@@ -58,6 +58,9 @@ namespace B1_Test_Task.ViewModels
             
         }
 
+        private string task2status;
+        public string Task2Status { get => task2status; set => Set(ref task2status, value); }
+
         #endregion
         #region COMMANDS
 
@@ -110,19 +113,20 @@ namespace B1_Test_Task.ViewModels
         private async void ImportFilesToDBCommandExecuted(object c)
         {
 
-            ImportState = "importing files...";
+            Task2Status = "importing files...";
+            
 
            
                 foreach (string filePath in filePaths)
                 {
                     
                     var importResult = await service.ImportDataToDB(new Task2Context(), filePath);
-                    
-                    ImportState +=$"\n{importResult}";
+
+                    Task2Status += $"\n{importResult}";
                     
                 }
                  
-            ImportState += "\nfinidhes importing files!";
+            ImportState += "\nimporting files finished";
 
             FilePaths.Clear();
 

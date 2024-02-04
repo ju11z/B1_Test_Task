@@ -55,7 +55,7 @@ namespace B1_Test_Task.Services
             }
             catch(Exception e)
             {
-                ExceptionNotifier.NotifyAboutException("adsdfgdfg");
+                return;
 
             }
 
