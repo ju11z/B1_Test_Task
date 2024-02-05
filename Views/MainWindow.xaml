@@ -108,7 +108,16 @@
                                 </Grid.ColumnDefinitions>
 
                                 <DataGrid  AutoGenerateColumns="False" Grid.Column="1" ItemsSource="{Binding Task2ViewModel.BalanceSheets, UpdateSourceTrigger=PropertyChanged}" Margin="20">
-
+                                    <DataGrid.RowStyle>
+                                        <Style TargetType="DataGridRow">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCorrect}" Value="false">
+                                                    <Setter Property="Background" Value="PaleVioletRed"/>
+                                                    <!-- Set the background color when the condition is met -->
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGrid.RowStyle>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn IsReadOnly="True"  Header="Account code"  Binding="{Binding AccCode}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Incoming balance asset" Binding="{Binding IncomingBalanceAsset}" />

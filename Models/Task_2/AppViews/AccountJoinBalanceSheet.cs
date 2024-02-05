@@ -17,5 +17,7 @@ namespace B1_Test_Task.Models.Task_2.DBViews
 
         public double OutgoingBalanceAsset { get; set; }
         public double OutgoingBalanceLiability { get; set; }
+
+        public bool IsCorrect { get; set; }
     }
 }

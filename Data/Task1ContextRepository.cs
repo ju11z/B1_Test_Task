@@ -13,6 +13,9 @@ namespace B1_Test_Task.Data
         {
             context = new Task1Context();
         }
+
+
+
         public long GetIntSumm()
         {
             var rez=context.Database.SqlQuery<long>("select sum(CAST(RanInt AS bigint)) from Rows");
