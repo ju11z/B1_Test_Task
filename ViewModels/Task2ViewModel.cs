@@ -16,7 +16,7 @@ using static B1_Test_Task.Data.Task2ContextRepository;
 
 namespace B1_Test_Task.ViewModels
 {
-    class Task2ViewModel: BaseViewModel
+    class Task2ViewModel : BaseViewModel
     {
         #region PROPERTIES
 
@@ -34,12 +34,7 @@ namespace B1_Test_Task.ViewModels
         private ExcelFileService service;
 
         private Task2ContextRepository repository;
-        /*
 
-        private ObservableCollection<BalanceSheet> balanceSheets;
-
-        public ObservableCollection<BalanceSheet> BalanceSheets { get => balanceSheets; set => Set(ref balanceSheets, value); }
-        */
         private ObservableCollection<AccountJoinBalanceSheet> balanceSheets;
 
         public ObservableCollection<AccountJoinBalanceSheet> BalanceSheets { get => balanceSheets; set => Set(ref balanceSheets, value); }
@@ -53,9 +48,10 @@ namespace B1_Test_Task.ViewModels
 
         private Statement selectedStatement;
         public Statement SelectedStatement
-        { get => selectedStatement; set => 
-                Set(ref selectedStatement, value);
-            
+        {
+            get => selectedStatement; set =>
+                  Set(ref selectedStatement, value);
+
         }
 
         private string task2status;
@@ -72,19 +68,17 @@ namespace B1_Test_Task.ViewModels
         private void UploadExcelFileCommandExecuted(object c)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.FileName = "Document"; // Default file name
+            dialog.FileName = "Document";
             dialog.Multiselect = true;
-            dialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm"; // Filter files by extension
+            dialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm";
 
-            // Show open file dialog box
             bool? result = dialog.ShowDialog();
 
-            // Process open file dialog box results
             if (result == true)
             {
                 string[] selectedFileNames = dialog.FileNames;
 
-                foreach(string name in selectedFileNames)
+                foreach (string name in selectedFileNames)
                 {
                     if (!FilePaths.Contains(name))
                     {
@@ -116,18 +110,16 @@ namespace B1_Test_Task.ViewModels
         {
 
             Task2Status = "importing files...";
-            
 
-           
-                foreach (string filePath in filePaths)
-                {
-                    
-                    var importResult = await service.ImportDataToDBAsync(new Task2Context(), filePath);
+            foreach (string filePath in filePaths)
+            {
 
-                    Task2Status += $"\n{importResult}";
-                    
-                }
-                 
+                var importResult = await service.ImportDataToDBAsync(new Task2Context(), filePath);
+
+                Task2Status += $"\n{importResult}";
+
+            }
+
             ImportState += "\nimporting files finished";
 
             FilePaths.Clear();
@@ -140,7 +132,7 @@ namespace B1_Test_Task.ViewModels
         private bool CanImportFilesToDBCommandExecute(object c)
         {
 
-            return FilePaths.Count>0;
+            return FilePaths.Count > 0;
 
         }
         #endregion
@@ -152,7 +144,7 @@ namespace B1_Test_Task.ViewModels
 
         private void LoadStatementsCommandExecuted(object c)
         {
-            
+
             BalanceSheets = new ObservableCollection<AccountJoinBalanceSheet>(repository.GetAccountInnerJoinBalanceSheet(SelectedStatement.Id));
 
         }
@@ -193,11 +185,11 @@ namespace B1_Test_Task.ViewModels
             DataImportedToDb += UpdateDataDisplay;
 
             SelectedStatement = context.Statements.FirstOrDefault();
-            if (SelectedStatement!=null)
+            if (SelectedStatement != null)
             {
                 BalanceSheets = new ObservableCollection<AccountJoinBalanceSheet>(repository.GetAccountInnerJoinBalanceSheet(SelectedStatement.Id).ToList());
             }
-            
+
 
         }
 
@@ -209,12 +201,9 @@ namespace B1_Test_Task.ViewModels
         {
             Statements = new ObservableCollection<Statement>(context.Statements.ToList());
 
-            BalanceSheets = new ObservableCollection<AccountJoinBalanceSheet>(repository.GetAccountInnerJoinBalanceSheet(1).ToList());
+            BalanceSheets = new ObservableCollection<AccountJoinBalanceSheet>(repository.GetAccountInnerJoinBalanceSheet(SelectedStatement.Id).ToList());
         }
 
-        private void HighlightBalanceSheet() {
-            
-        }
 
         #endregion
     }

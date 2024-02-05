@@ -34,6 +34,7 @@ namespace B1_Test_Task.Data
             return AccountType.undefined;
         }
 
+        
         private bool BalanceSheetIsCorrect(AccountType type)
         {
 

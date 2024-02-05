@@ -17,7 +17,7 @@ namespace B1_Test_Task.Services
 {
     public class ExcelFileService
     {
-        private const int IMPORT_BLOCK_SIZE = 10;
+        private const int IMPORT_BLOCK_SIZE = 1;
 
         private const int ACCOUNT_DATA_START_ROW = 9;
         private const int ACCOUNT_START_ROW = 8;
@@ -41,19 +41,19 @@ namespace B1_Test_Task.Services
         {
             ISheet sheet = workBoook.GetSheetAt(0);
 
-            try { 
+            try
+            {
 
-            await ImportFirstLevelAccountToDBAsync(sheet, context);
+                await ImportFirstLevelAccountToDBAsync(sheet, context);
 
                 await ImportSecondLevelAccountToDBAsync(sheet, context);
 
                 await ImportThirdLevelAccountToDBAsync(sheet, context);
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return;
-
             }
         }
 
@@ -63,14 +63,13 @@ namespace B1_Test_Task.Services
             {
                 InitWorkBook(filePath);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                ExceptionNotifier.NotifyAboutException(e.Message);
                 return $" error occured while importing {filePath}";
             }
-                
 
-            ISheet sheet = workBoook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
+
+            ISheet sheet = workBoook.GetSheetAt(0);
 
             try
             {
@@ -78,7 +77,6 @@ namespace B1_Test_Task.Services
             }
             catch (Exception e)
             {
-                ExceptionNotifier.NotifyAboutException(e.Message);
                 return $" error occured while importing {filePath}";
             }
 
@@ -87,8 +85,6 @@ namespace B1_Test_Task.Services
             await importaccountstodb;
             var importaccountdatatodb = ImportBalanceSheetToDBAsync(statementId, context, filePath);
             await importaccountdatatodb;
-
-            //string importResult = $"{filePath} imported successfully";
 
             return $"{filePath} imported successfully";
         }
@@ -110,7 +106,7 @@ namespace B1_Test_Task.Services
                     }
                 }
             }
-            catch (IOException ex) // or specific exception type related to file access
+            catch (IOException ex)
             {
                 throw;
             }
@@ -127,8 +123,8 @@ namespace B1_Test_Task.Services
 
             MatchCollection dateMatches = Regex.Matches(dateRowValue, pattern);
 
-            string firstDate="";
-            string lastDate="";
+            string firstDate = "";
+            string lastDate = "";
 
             if (dateMatches.Count > 1)
             {
@@ -136,15 +132,15 @@ namespace B1_Test_Task.Services
                 lastDate = dateMatches[1].Value;
             }
 
-            DateTime periodStart= DateTime.ParseExact(firstDate, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime periodStart = DateTime.ParseExact(firstDate, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
             DateTime periodEnd = DateTime.ParseExact(lastDate, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
 
             Statement statement = new Statement
             {
-                BankTitle=bankTitle,
-                StatementTitle=statementTitle,
-                PeriodStart=periodStart,
-                PeriodEnd=periodEnd
+                BankTitle = bankTitle,
+                StatementTitle = statementTitle,
+                PeriodStart = periodStart,
+                PeriodEnd = periodEnd
             };
 
             context.Statements.Add(statement);
@@ -152,19 +148,19 @@ namespace B1_Test_Task.Services
 
             return statement.Id;
 
-            
+
         }
-           
+
         private bool AccountCodeIsUnique(int code, Task2Context context)
         {
             return context.Accounts.Where(a => a.Code == code).ToList().Count < 1;
         }
-        
+
 
         private async Task ImportFirstLevelAccountToDBAsync(ISheet sheet, Task2Context context)
         {
             string pattern = @"\d+";
-            int code=0;
+            int code = 0;
 
             await Task.Run(async () =>
             {
@@ -178,7 +174,6 @@ namespace B1_Test_Task.Services
                         ICell cell = sheet.GetRow(i).GetCell(0);
                         DataFormatter dataFormatter = new DataFormatter(CultureInfo.CurrentCulture);
                         string value = dataFormatter.FormatCellValue(cell);
-                        //string value = row.GetCell(ACCOUNT_COLUMN).NumericCellValue.ToString();
                         if (value.Contains("КЛАСС") && !value.Contains("КЛАССУ"))
                         {
                             Match match = Regex.Match(value, pattern);
@@ -195,9 +190,9 @@ namespace B1_Test_Task.Services
                             {
                                 ParentId = 0,
                                 Code = code,
-                                Title=value
+                                Title = value
                             };
-                           
+
                             context.Accounts.Add(entity);
                             await context.SaveChangesAsync();
 
@@ -205,7 +200,7 @@ namespace B1_Test_Task.Services
                         }
                     }
                 }
-                
+
 
             });
         }
@@ -225,7 +220,7 @@ namespace B1_Test_Task.Services
         {
             List<Account> secondLevelParents = parents.Where(p => p.Code.ToString().Length > 1).ToList();
 
-            Account account = secondLevelParents.Find(p => p.Code.ToString().Substring(0,2)==childValue.Substring(0, 2));
+            Account account = secondLevelParents.Find(p => p.Code.ToString().Substring(0, 2) == childValue.Substring(0, 2));
 
             if (account != null)
                 return account.Id;
@@ -236,7 +231,7 @@ namespace B1_Test_Task.Services
 
         private async Task ImportSecondLevelAccountToDBAsync(ISheet sheet, Task2Context context)
         {
-            
+
             string pattern = @"\b\d{2}\b";
             Regex regex = new Regex(pattern);
 
@@ -253,11 +248,10 @@ namespace B1_Test_Task.Services
                         ICell cell = sheet.GetRow(i).GetCell(0);
                         DataFormatter dataFormatter = new DataFormatter(CultureInfo.CurrentCulture);
                         string value = dataFormatter.FormatCellValue(cell);
-                        //string value = row.GetCell(ACCOUNT_COLUMN).NumericCellValue.ToString();
                         MatchCollection matches = regex.Matches(value);
-                        if (matches.Count==1)
+                        if (matches.Count == 1)
                         {
-                            
+
                             int parentId = FindFirstLevelParentId(value, parents);
                             int code = Int32.Parse(value);
 
@@ -269,17 +263,17 @@ namespace B1_Test_Task.Services
                                 ParentId = parentId,
                                 Code = code
                             };
-                            
-                                context.Accounts.Add(entity);
+
+                            context.Accounts.Add(entity);
                             await context.SaveChangesAsync();
 
                         }
                     }
                 }
 
-                
+
             });
-            
+
 
         }
 
@@ -302,11 +296,10 @@ namespace B1_Test_Task.Services
                         ICell cell = sheet.GetRow(i).GetCell(0);
                         DataFormatter dataFormatter = new DataFormatter(CultureInfo.CurrentCulture);
                         string value = dataFormatter.FormatCellValue(cell);
-                        //string value = row.GetCell(ACCOUNT_COLUMN).NumericCellValue.ToString();
                         MatchCollection matches = regex.Matches(value);
                         if (matches.Count == 1)
                         {
-                            int code= Int32.Parse(value);
+                            int code = Int32.Parse(value);
 
                             if (!AccountCodeIsUnique(code, context))
                                 continue;
@@ -318,8 +311,8 @@ namespace B1_Test_Task.Services
                                 Code = code
                             };
 
-                            
-                                context.Accounts.Add(entity);
+
+                            context.Accounts.Add(entity);
                             await context.SaveChangesAsync();
 
 
@@ -392,20 +385,21 @@ namespace B1_Test_Task.Services
             }
 
             return result;
-            
+
         }
 
-        private async Task ImportBalanceSheetToDBAsync(int statementId, Task2Context context ,string filePath)
+        private async Task ImportBalanceSheetToDBAsync(int statementId, Task2Context context, string filePath)
         {
 
-            try { 
+            try
+            {
                 List<BalanceSheet> block = new List<BalanceSheet>();
 
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    
-                    ISheet sheet = workBoook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
-                    
+
+                    ISheet sheet = workBoook.GetSheetAt(0);
+
                     for (int i = ACCOUNT_DATA_START_ROW; i <= sheet.LastRowNum; i++)
                     {
                         IRow row = sheet.GetRow(i);
@@ -413,7 +407,7 @@ namespace B1_Test_Task.Services
                         if (row.GetCell(0).ToString().Contains("КЛАСС") || row.GetCell(0).ToString().Contains("БАЛАНС"))
                             continue;
 
-                        if (row != null) // null cell values may cause null reference exceptions
+                        if (row != null)
                         {
                             BalanceSheet entity = new BalanceSheet
                             {
@@ -423,8 +417,8 @@ namespace B1_Test_Task.Services
                                 TurnoverCredit = row.GetCell(TURNOVER_CREDIT_COLUMN).NumericCellValue,
                                 OutgoingBalanceAsset = row.GetCell(OUTGOING_BALANCE_ASSET_COLUMN).NumericCellValue,
                                 OutgoingBalanceLiability = row.GetCell(OUTGOING_BALANCE_LIABILITY_COLUMN).NumericCellValue,
-                                StatementId=statementId,
-                                AccountId= await FindAccountIdByValueAsync(Int32.Parse(row.GetCell(ACCOUNT_COLUMN).ToString()), context)
+                                StatementId = statementId,
+                                AccountId = await FindAccountIdByValueAsync(Int32.Parse(row.GetCell(ACCOUNT_COLUMN).ToString()), context)
                             };
 
                             block.Add(entity);
@@ -439,19 +433,19 @@ namespace B1_Test_Task.Services
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                ExceptionNotifier.NotifyAboutException(e.Message);
+                
                 return;
             }
 
-            
+
         }
 
         private async Task<int> FindAccountIdByValueAsync(int code, Task2Context context)
         {
             List<Account> accounts = context.Accounts.ToList();
-            int id= await Task.Run(() => accounts.Find(a => a.Code == code).Id);
+            int id = await Task.Run(() => accounts.Find(a => a.Code == code).Id);
             if (id != null)
                 return id;
             return 0;

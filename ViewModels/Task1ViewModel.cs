@@ -14,11 +14,10 @@ using System.Windows.Input;
 
 namespace B1_Test_Task.ViewModels
 {
-    public class Task1ViewModel: BaseViewModel
+    public class Task1ViewModel : BaseViewModel
     {
         #region PROPERTIES
 
-        //const int FILES_AMOUNT = 100;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Task1ContextRepository repository;
@@ -26,7 +25,7 @@ namespace B1_Test_Task.ViewModels
         private Random random = new Random();
         private XMLFileService fileService = new XMLFileService();
 
-        private int filesCreatedAmount=0;
+        private int filesCreatedAmount = 0;
         public int FilesCreatedAmount { get => filesCreatedAmount; set => Set(ref filesCreatedAmount, value); }
 
         private int rowsDeletedAmount;
@@ -47,7 +46,7 @@ namespace B1_Test_Task.ViewModels
         private List<string> fileNames = new List<string>();
 
         private string concatenateProcessState;
-        public string ConcatenateProcessState { get=>concatenateProcessState; set=>Set(ref concatenateProcessState,value); }
+        public string ConcatenateProcessState { get => concatenateProcessState; set => Set(ref concatenateProcessState, value); }
 
         public string DeleteSubstring { get; set; }
 
@@ -63,7 +62,7 @@ namespace B1_Test_Task.ViewModels
         private int progressBarValue;
         public int ProgressBarValue { get => progressBarValue; set => Set(ref progressBarValue, value); }
 
-        public int FilesConcatenatedCount { get=>filesConcatenatedCount; set=>Set(ref filesConcatenatedCount, value); }
+        public int FilesConcatenatedCount { get => filesConcatenatedCount; set => Set(ref filesConcatenatedCount, value); }
         private int filesConcatenatedCount;
 
 
@@ -76,7 +75,7 @@ namespace B1_Test_Task.ViewModels
         private Task1Context context;
 
         private bool canChangeFilesAmount;
-        public bool CanChangeFilesAmount { get=>canChangeFilesAmount; set=>Set(ref canChangeFilesAmount, value); }
+        public bool CanChangeFilesAmount { get => canChangeFilesAmount; set => Set(ref canChangeFilesAmount, value); }
 
         private int filesAmountMax;
         public int FilesAmountMax { get => filesAmountMax; set => Set(ref filesAmountMax, value); }
@@ -89,8 +88,6 @@ namespace B1_Test_Task.ViewModels
 
         private string filesOutputFolder;
         public string FilesOutputFolder { get => filesOutputFolder; set => Set(ref filesOutputFolder, value); }
-
-        //private Task1Context context;
 
 
         #endregion
@@ -112,16 +109,16 @@ namespace B1_Test_Task.ViewModels
             FilesCreatedAmount = 0;
             operationIsRunning = true;
 
-            for(int i=0; i< FilesAmountCurrent; i++)
+            for (int i = 0; i < FilesAmountCurrent; i++)
             {
-                string fileName = FilesOutputFolder+"/"+$"data_{i+1}.xml";
+                string fileName = FilesOutputFolder + "/" + $"data_{i + 1}.xml";
                 fileNames.Add(fileName);
                 await GenerateFileData(fileName);
                 FilesCreatedAmount++;
 
                 ProgressBarValue = FilesCreatedAmount;
                 Task1Status = $"generated {FilesCreatedAmount}/{FilesAmountCurrent} files";
-                
+
             }
             operationIsRunning = false;
             filesAreGenerated = true;
@@ -132,8 +129,8 @@ namespace B1_Test_Task.ViewModels
 
         private bool CanGenerateFilesCommandExecute(object c)
         {
-            
-            return !operationIsRunning;
+
+            return !operationIsRunning && !filesAreGenerated;
 
         }
         #endregion
@@ -148,14 +145,12 @@ namespace B1_Test_Task.ViewModels
             FilesConcatenatedCount = 0;
             ProgressBarMin = 0;
             ProgressBarMax = FilesAmountCurrent;
-            //FilesAreCreating = true;
             Task1Status = "start concatenate files";
             operationIsRunning = true;
-            
+
             Task t = fileService.DeleteRowsAsync(fileNames, DeleteSubstring);
             await t;
             ConcatenateProcessState = "concatenating files...";
-            //await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
             await fileService.ConcatenateXmlFilesAsync(fileNames, FilesOutputFolder + "/" + "data_common.xml");
             ConcatenateProcessState = "finished concatenating files!";
 
@@ -168,18 +163,13 @@ namespace B1_Test_Task.ViewModels
 
         }
 
-        
-
         private bool CanConcatenateFilesCommandExecute(object c)
         {
-
-            return !operationIsRunning&&filesAreGenerated;
-
+            return !operationIsRunning && !filesAreConcatenated && filesAreGenerated;
         }
         #endregion
 
         #region  ImportDataToDBCommand
-
 
         public BaseCommand ImportDataToDBCommand { get; }
 
@@ -200,17 +190,15 @@ namespace B1_Test_Task.ViewModels
 
         }
 
-
         private bool CanImportDataToDBCommandExecute(object c)
         {
 
-            return !operationIsRunning&&filesAreConcatenated;
+            return !operationIsRunning && !filesAreImported && filesAreConcatenated;
 
         }
         #endregion
 
         #region  SetFilesFolderCommand
-
 
         public BaseCommand SetFilesFolderCommand { get; }
 
@@ -222,23 +210,18 @@ namespace B1_Test_Task.ViewModels
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 var folder = dialog.FileName;
-                //MessageBox.Show(folder);
                 FilesOutputFolder = folder;
-                // Do something with selected folder string
             }
 
         }
 
-
         private bool CanSetFilesFolderCommandExecute(object c)
         {
 
-            return !filesAreGenerated;
+            return !filesAreGenerated && !operationIsRunning;
 
         }
         #endregion
-
-
 
         #region  CalculateSummAndMedianCommand
 
@@ -254,7 +237,6 @@ namespace B1_Test_Task.ViewModels
 
         }
 
-
         private bool CanCalculateSummAndMedianCommandExecute(object c)
         {
 
@@ -262,7 +244,6 @@ namespace B1_Test_Task.ViewModels
 
         }
         #endregion
-
 
         #endregion
         #region CONSTRUCTOR
@@ -277,7 +258,6 @@ namespace B1_Test_Task.ViewModels
             repository = new Task1ContextRepository();
 
             context = new Task1Context();
-
 
             fileService.RowDeleted += UpdateRowsDeletedCount;
             fileService.OneFileConcatenated += UpdateFileConcatenatedCount;
@@ -298,9 +278,10 @@ namespace B1_Test_Task.ViewModels
         private async Task GenerateFileData(string fileName)
         {
             List<Row> rows = new List<Row>();
-            int a=0;
+            int a = 0;
 
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 for (int i = 0; i < ROWS_IN_FILE_AMOUNT; i++)
                 {
                     Row row = GenerateRowData();
@@ -308,7 +289,7 @@ namespace B1_Test_Task.ViewModels
                     a++;
                 }
             });
-            
+
             await fileService.WriteDataToFileAsync(rows, fileName);
         }
 
@@ -327,16 +308,12 @@ namespace B1_Test_Task.ViewModels
 
         private DateTime GenerateDateTime()
         {
-            
-            // Calculate the range for the random date
             DateTime today = DateTime.Today;
             DateTime fiveYearsAgo = today.AddYears(-5);
 
-            // Generate a random number of days within the range
             int range = (today - fiveYearsAgo).Days;
             int randomDays = random.Next(range);
 
-            // Add the random number of days to the start date
             DateTime randomDate = fiveYearsAgo.AddDays(randomDays);
 
             return randomDate;
@@ -344,7 +321,6 @@ namespace B1_Test_Task.ViewModels
 
         private string GenerateLatinString()
         {
-            
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
             char[] randomString = new char[10];
@@ -355,12 +331,11 @@ namespace B1_Test_Task.ViewModels
             }
 
             return new string(randomString);
-            
+
         }
 
         private string GenerateCyrillicString()
         {
-            
             const string chars = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя";
 
             char[] randomString = new char[10];
@@ -371,7 +346,6 @@ namespace B1_Test_Task.ViewModels
             }
 
             return new string(randomString);
-
         }
 
         public int GenerateRandomEvenInteger()
@@ -381,20 +355,19 @@ namespace B1_Test_Task.ViewModels
 
         private float GenerateRandomDecimal()
         {
-            float randomValue = (float)random.NextDouble() * 19 + 1; // generates a random value between 1 and 20
-            return (float)Math.Round(randomValue, 8); // rounds the value to 8 decimal places
+            float randomValue = (float)random.NextDouble() * 19 + 1;
+            return (float)Math.Round(randomValue, 8);
         }
 
         private void UpdateRowsDeletedCount()
         {
             RowsDeletedAmount++;
             Task1Status = $"deleted {RowsDeletedAmount} rows";
-            
         }
 
         private void UpdateRowsImportedToDBCount(int amount)
         {
-            RowsImportedToDBCount+=amount;
+            RowsImportedToDBCount += amount;
             Task1Status = $"imported {RowsImportedToDBCount} rows to database";
             ProgressBarValue = rowsImportedToDBCount;
         }
@@ -406,7 +379,6 @@ namespace B1_Test_Task.ViewModels
             ProgressBarValue = FilesConcatenatedCount;
         }
 
-       
 
         private void RaiseCommandsCanExecuteCnaged()
         {

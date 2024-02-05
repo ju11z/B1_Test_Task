@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace B1_Test_Task.ViewModels
 {
-    class MainWindowViewModel: BaseViewModel
+    class MainWindowViewModel : BaseViewModel
     {
         public Task1ViewModel Task1ViewModel { get; set; }
         public Task2ViewModel Task2ViewModel { get; set; }

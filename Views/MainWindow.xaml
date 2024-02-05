@@ -80,8 +80,8 @@
                                 <TextBlock Text="Upload file"></TextBlock>
                             </TabItem.Header>
                             <DockPanel>
-                                <Grid DockPanel.Dock="Bottom" Height="200" >
-                                    <TextBlock Margin="50" FontSize="20" Text="{Binding Task2ViewModel.Task2Status, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Grid DockPanel.Dock="Bottom" Height="300" >
+                                    <TextBlock Margin="50" FontSize="18" Text="{Binding Task2ViewModel.Task2Status, UpdateSourceTrigger=PropertyChanged}"/>
                                 </Grid>
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -111,7 +111,7 @@
                                     <DataGrid.RowStyle>
                                         <Style TargetType="DataGridRow">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsCorrect}" Value="false">
+                                                <DataTrigger Binding="{Binding IsCorrect, UpdateSourceTrigger=PropertyChanged}" Value="false">
                                                     <Setter Property="Background" Value="PaleVioletRed"/>
                                                     <!-- Set the background color when the condition is met -->
                                                 </DataTrigger>
@@ -121,12 +121,11 @@
                                     <DataGrid.Columns>
                                         <DataGridTextColumn IsReadOnly="True"  Header="Account code"  Binding="{Binding AccCode}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Incoming balance asset" Binding="{Binding IncomingBalanceAsset}" />
-                                        <DataGridTextColumn IsReadOnly="True" Header="Incoming balance asset" Binding="{Binding IncomingBalanceLiability}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Incoming balance liability" Binding="{Binding IncomingBalanceLiability}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Turnover debet"  Binding="{Binding TurnoverDebet}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Turnover credit"  Binding="{Binding TurnoverCredit}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance asset" Binding="{Binding OutgoingBalanceAsset}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance liability" Binding="{Binding OutgoingBalanceLiability}" />
-                                        <DataGridTextColumn IsReadOnly="True" Header="Suggested account type" Binding="{Binding AccountType}" />
                                     </DataGrid.Columns>
 
                                 </DataGrid>
