@@ -212,6 +212,10 @@ namespace B1_Test_Task.ViewModels
             BalanceSheets = new ObservableCollection<AccountJoinBalanceSheet>(repository.GetAccountInnerJoinBalanceSheet(1).ToList());
         }
 
+        private void HighlightBalanceSheet() {
+            
+        }
+
         #endregion
     }
 }

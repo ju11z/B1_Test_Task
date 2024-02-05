@@ -29,32 +29,38 @@
 
                     </Grid>
                     <Grid>
-                        
+
                         <ListView>
-                            <ListViewItem Padding="20">
+                            <ListViewItem Padding="50">
                                 <Grid>
-                                <Button Content="Generate files" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"  Command="{Binding Task1ViewModel.GenerateFilesCommand}" Grid.ColumnSpan="2"/>
-                                    <Slider Margin="167,0,-167.8,0" Minimum="{Binding Task1ViewModel.FilesAmountMin}" Maximum="{Binding Task1ViewModel.FilesAmountMax}" Value="{Binding Task1ViewModel.FilesAmountCurrent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Task1ViewModel.CanChangeFilesAmount, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                                    <Button Content="Generate files" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"  Command="{Binding Task1ViewModel.GenerateFilesCommand}" Grid.ColumnSpan="2"/>
+                                    <Button Content="Choose files folder" HorizontalAlignment="Left" Margin="200,0,0,0" VerticalAlignment="Top"  Command="{Binding Task1ViewModel.SetFilesFolderCommand}" Grid.ColumnSpan="2"/>
+                                    <Slider Margin="587,32,-587,-32" Minimum="{Binding Task1ViewModel.FilesAmountMin, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding Task1ViewModel.FilesAmountMax, UpdateSourceTrigger=PropertyChanged}" Value="{Binding Task1ViewModel.FilesAmountCurrent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Task1ViewModel.CanChangeFilesAmount, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                                    <TextBlock Text="{Binding Task1ViewModel.FilesAmountCurrent, UpdateSourceTrigger=PropertyChanged}" Margin="770,15,-420,-15" HorizontalAlignment="Center"></TextBlock>
+                                    <TextBlock Text="amount of files" Margin="612,0,-612,0"></TextBlock>
+                                    <TextBlock Text="output path" Margin="415,1,-179,-1"/>
+                                    <TextBlock Text="{Binding Task1ViewModel.FilesOutputFolder,UpdateSourceTrigger=PropertyChanged}" Margin="415,18,-179,-18"/>
                                 </Grid>
                             </ListViewItem>
-                            <ListViewItem Padding="20">
+                            <ListViewItem Padding="50">
                                 <Grid>
                                     <Button Content="Concatenate files" HorizontalAlignment="Left"  VerticalAlignment="Top"  Command="{Binding Task1ViewModel.ConcatenateFilesCommand}" Grid.ColumnSpan="2"/>
                                     <TextBlock HorizontalAlignment="Left" Margin="158,2,-9,0" TextWrapping="Wrap" Text="delete rows with substring" VerticalAlignment="Top"/>
                                     <TextBox HorizontalAlignment="Left" Margin="158,22,0,0" Text="{Binding Task1ViewModel.DeleteSubstring, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"  RenderTransformOrigin="-0.747,1.028"/>
+                                    <TextBlock HorizontalAlignment="Left" Margin="158,2,-9,0" TextWrapping="Wrap" Text="delete rows with substring" VerticalAlignment="Top"/>
                                 </Grid>
 
 
 
                             </ListViewItem>
-                            <ListViewItem Padding="20">
-                                <Button Content="Import to DB" HorizontalAlignment="Left"  VerticalAlignment="Top"  Command="{Binding Task1ViewModel.ImportDataToDBCommand}" Grid.ColumnSpan="2"/>
+                            <ListViewItem Padding="50">
+                                <Button Content="Upload to DB" HorizontalAlignment="Left"  VerticalAlignment="Top"  Command="{Binding Task1ViewModel.ImportDataToDBCommand}" Grid.ColumnSpan="2"/>
                             </ListViewItem>
-                            <ListViewItem Padding="20">
+                            <ListViewItem Padding="50">
                                 <Button Content="Calculate summ and median" HorizontalAlignment="Left"  VerticalAlignment="Top" Command="{Binding Task1ViewModel.CalculateSummAndMedianCommand}" Grid.ColumnSpan="2"/>
                             </ListViewItem>
                         </ListView>
-                        
+
 
 
 
@@ -85,11 +91,11 @@
                                     </Grid.RowDefinitions>
                                     <Button Content="Upload file" Grid.Row="0" Command="{Binding Task2ViewModel.UploadExcelFileCommand}" HorizontalAlignment="Left" Margin="30" VerticalAlignment="Top" />
                                     <ListBox Grid.Row="1" ItemsSource="{Binding Task2ViewModel.FilePaths, UpdateSourceTrigger=PropertyChanged}"  BorderThickness="2" BorderBrush="Purple" Margin="30"></ListBox>
-                                    <Button Grid.Row="2" Content="Import to DB" HorizontalAlignment="Left" Margin="30" VerticalAlignment="Top" Command="{Binding Task2ViewModel.ImportFilesToDBCommand}"/>
-                                    
+                                    <Button Grid.Row="2" Content="Export to DB" HorizontalAlignment="Left" Margin="30" VerticalAlignment="Top" Command="{Binding Task2ViewModel.ImportFilesToDBCommand}"/>
+
                                 </Grid>
                             </DockPanel>
-                            
+
                         </TabItem>
                         <TabItem>
                             <TabItem.Header>
@@ -100,18 +106,20 @@
                                     <ColumnDefinition Width="1*"></ColumnDefinition>
                                     <ColumnDefinition Width="3*"></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
-                                <ListView Grid.Column="1" ItemsSource="{Binding Task2ViewModel.BalanceSheets, UpdateSourceTrigger=PropertyChanged}" Margin="20">
-                                    <ListView.View>
-                                        <GridView>
-                                            <GridViewColumn  Header="Account code"  DisplayMemberBinding="{Binding AccCode}" />
-                                            <GridViewColumn Header="Incoming balance asset"  DisplayMemberBinding="{Binding IncomingBalanceAsset}" />
-                                            <GridViewColumn Header="Turnover debet"  DisplayMemberBinding="{Binding TurnoverDebet}" />
-                                            <GridViewColumn Header="Turnover credit"  DisplayMemberBinding="{Binding TurnoverCredit}" />
-                                            <GridViewColumn Header="Outgoing balance asset" DisplayMemberBinding="{Binding OutgoingBalanceAsset}" />
-                                            <GridViewColumn Header="Outgoing balance liability" DisplayMemberBinding="{Binding OutgoingBalanceLiability}" />
-                                        </GridView>
-                                    </ListView.View>
-                                </ListView>
+
+                                <DataGrid  AutoGenerateColumns="False" Grid.Column="1" ItemsSource="{Binding Task2ViewModel.BalanceSheets, UpdateSourceTrigger=PropertyChanged}" Margin="20">
+
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn IsReadOnly="True"  Header="Account code"  Binding="{Binding AccCode}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Incoming balance asset" Binding="{Binding IncomingBalanceAsset}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Turnover debet"  Binding="{Binding TurnoverDebet}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Turnover credit"  Binding="{Binding TurnoverCredit}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance asset" Binding="{Binding OutgoingBalanceAsset}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance liability" Binding="{Binding OutgoingBalanceLiability}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance liability" Binding="{Binding DataExamination}" />
+                                    </DataGrid.Columns>
+
+                                </DataGrid>
 
                                 <ComboBox  Grid.Column="0"   ItemsSource="{Binding Task2ViewModel.Statements}" SelectedItem="{Binding Task2ViewModel.SelectedStatement, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" VerticalAlignment="Top" DisplayMemberPath="{Binding StatementTitle, UpdateSourceTrigger=PropertyChanged}" Margin="20" >
                                     <ComboBox.ItemTemplate>

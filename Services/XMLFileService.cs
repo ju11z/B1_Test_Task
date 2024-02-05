@@ -128,6 +128,8 @@ namespace B1_Test_Task.Services
                 Console.WriteLine("XML file deleted successfully.");
             }
 
+            //string buffer_file
+
             await Task.Run(() => {
                 using (StreamWriter writer = new StreamWriter(outputFileName))
                 {
@@ -158,7 +160,6 @@ namespace B1_Test_Task.Services
             if (File.Exists(outputFileName))
             {
                 File.Delete(outputFileName);
-                Console.WriteLine("XML file deleted successfully.");
             }
 
             XmlDocument concatenatedDocument = new XmlDocument();
@@ -251,73 +252,46 @@ namespace B1_Test_Task.Services
         public async Task ImportDataToDB(Task1Context context, string filePath)
         {
             List<Row> rows = await ReadDataFromFileAsync(filePath);
+            Row[] block = new Row[IMPORT_BLOCK_SIZE];
+           int cutBlock;
 
+           await Task.Run(async () =>
+           {
+               int i = 1;
+               foreach (var row in rows)
+               {
 
-            //array realization
+                   cutBlock = i % IMPORT_BLOCK_SIZE;
+                   block[cutBlock] = row;
 
+                   if (cutBlock == 0)
+                   {
+                       RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
+                       await Task.Run(() => context.Rows.AddRange(block));
+                       await Task.Run(() => context.SaveChangesAsync());
 
-            /*Row[] block = new Row[IMPORT_BLOCK_SIZE];
-            int cutBlock;
+                   }
+                   i++;
+               }
+           });
+            /*
+            List<Row> rows = await ReadDataFromFileAsync(filePath);
 
-            await Task.Run(() =>
-            {
-                int i = 1;
-                foreach (var row in rows)
-                {
-                    
-                    cutBlock = i % IMPORT_BLOCK_SIZE;
-                    block[cutBlock] = row;
-
-                    if (cutBlock == 0)
-                    {
-                        RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
-                        context.Rows.AddRange(block);
-                        context.SaveChanges();
-                        
-                    }
-                    i++;
-                }
-            });*/
-
-            //List realization
             int cutBlock;
             List<Row> block = new List<Row>();
             await Task.Run(() =>
             {
-                int i = 1;
-                foreach (var row in rows)
-                {
-
-                    cutBlock = i % IMPORT_BLOCK_SIZE;
-                    block.Add(row);
-
-                    if (cutBlock == 0)
-                    {
-                        RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
-                        context.Rows.AddRange(block);
-                        context.SaveChanges();
-                        block.Clear();
-                    }
-                    i++;
-                }/*
-                for (int i = 1; i < rows.Count + 1; i++)
+                for(int i=1; i < rows.Count+1; i+=IMPORT_BLOCK_SIZE)
                 {
                     
-                    block.Add(rows[i - 1]);
-
-
-
-                    if (i % IMPORT_BLOCK_SIZE == 0)
-                    {
+                        block = rows.GetRange(i, IMPORT_BLOCK_SIZE);
                         RowImportedToDB?.Invoke(IMPORT_BLOCK_SIZE);
                         context.Rows.AddRange(block);
                         context.SaveChanges();
-                        block.Clear();
-                    }
-                }*/
+                    
+                }
             });
-
-
+            */
 
         }
 

@@ -3,11 +3,13 @@ using B1_Test_Task.Data;
 using B1_Test_Task.Models.Task_1;
 using B1_Test_Task.Services;
 using B1_Test_Task.ViewModels.Base;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace B1_Test_Task.ViewModels
@@ -85,6 +87,9 @@ namespace B1_Test_Task.ViewModels
         private int filesAmountCurrent;
         public int FilesAmountCurrent { get => filesAmountCurrent; set => Set(ref filesAmountCurrent, value); }
 
+        private string filesOutputFolder;
+        public string FilesOutputFolder { get => filesOutputFolder; set => Set(ref filesOutputFolder, value); }
+
         //private Task1Context context;
 
 
@@ -109,7 +114,7 @@ namespace B1_Test_Task.ViewModels
 
             for(int i=0; i< FilesAmountCurrent; i++)
             {
-                string fileName = $"data_{i+1}.xml";
+                string fileName = FilesOutputFolder+"/"+$"data_{i+1}.xml";
                 fileNames.Add(fileName);
                 await GenerateFileData(fileName);
                 FilesCreatedAmount++;
@@ -151,7 +156,7 @@ namespace B1_Test_Task.ViewModels
             await t;
             ConcatenateProcessState = "concatenating files...";
             //await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
-            await fileService.ConcatenateXmlFilesAsync(fileNames, "data_common.xml");
+            await fileService.ConcatenateXmlFilesAsync(fileNames, FilesOutputFolder + "/" + "data_common.xml");
             ConcatenateProcessState = "finished concatenating files!";
 
             operationIsRunning = false;
@@ -185,7 +190,7 @@ namespace B1_Test_Task.ViewModels
             Task1Status = "start importing data to database";
 
             operationIsRunning = true;
-            await fileService.ImportDataToDB(context,"data_common.xml");
+            await fileService.ImportDataToDB(context, FilesOutputFolder + "/" + "data_common.xml");
             operationIsRunning = false;
             filesAreImported = true;
 
@@ -203,6 +208,37 @@ namespace B1_Test_Task.ViewModels
 
         }
         #endregion
+
+        #region  SetFilesFolderCommand
+
+
+        public BaseCommand SetFilesFolderCommand { get; }
+
+        private async void OnSetFilesFolderCommandExecuted(object c)
+        {
+            var dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var folder = dialog.FileName;
+                //MessageBox.Show(folder);
+                FilesOutputFolder = folder;
+                // Do something with selected folder string
+            }
+
+        }
+
+
+        private bool CanSetFilesFolderCommandExecute(object c)
+        {
+
+            return !filesAreGenerated;
+
+        }
+        #endregion
+
+
 
         #region  CalculateSummAndMedianCommand
 
@@ -237,6 +273,7 @@ namespace B1_Test_Task.ViewModels
             ConcatenateFilesCommand = new BaseCommand(OnConcatenateFilesCommandExecuted, CanConcatenateFilesCommandExecute);
             ImportDataToDBCommand = new BaseCommand(OnImportDataToDBCommandExecuted, CanImportDataToDBCommandExecute);
             CalculateSummAndMedianCommand = new BaseCommand(OnCalculateSummAndMedianCommandExecuted, CanCalculateSummAndMedianCommandExecute);
+            SetFilesFolderCommand = new BaseCommand(OnSetFilesFolderCommandExecuted, CanSetFilesFolderCommandExecute);
             repository = new Task1ContextRepository();
 
             context = new Task1Context();
@@ -248,6 +285,7 @@ namespace B1_Test_Task.ViewModels
 
             FilesAmountMax = 100;
             FilesAmountMin = 10;
+            FilesAmountCurrent = FilesAmountMin;
             CanChangeFilesAmount = true;
 
             ProgressBarValue = 0;
@@ -375,6 +413,7 @@ namespace B1_Test_Task.ViewModels
             GenerateFilesCommand.RaiseCanExecuteChanged();
             ConcatenateFilesCommand.RaiseCanExecuteChanged();
             ImportDataToDBCommand.RaiseCanExecuteChanged();
+            SetFilesFolderCommand.RaiseCanExecuteChanged();
         }
 
         #endregion

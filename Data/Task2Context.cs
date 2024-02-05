@@ -25,7 +25,8 @@ namespace B1_Test_Task.Data
         {
             Database.SetInitializer(new Initializer());
         }
-       
+
+
 
         public class Initializer : IDatabaseInitializer<Task2Context>
         {
