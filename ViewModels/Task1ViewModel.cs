@@ -16,7 +16,7 @@ namespace B1_Test_Task.ViewModels
     {
         #region PROPERTIES
 
-        const int FILES_AMOUNT = 10;
+        //const int FILES_AMOUNT = 100;
         const int ROWS_IN_FILE_AMOUNT = 100000;
 
         private Task1ContextRepository repository;
@@ -73,7 +73,17 @@ namespace B1_Test_Task.ViewModels
 
         private Task1Context context;
 
-        enum RadioOptions { Option1, Option2 }
+        private bool canChangeFilesAmount;
+        public bool CanChangeFilesAmount { get=>canChangeFilesAmount; set=>Set(ref canChangeFilesAmount, value); }
+
+        private int filesAmountMax;
+        public int FilesAmountMax { get => filesAmountMax; set => Set(ref filesAmountMax, value); }
+
+        private int filesAmountMin;
+        public int FilesAmountMin { get => filesAmountMin; set => Set(ref filesAmountMin, value); }
+
+        private int filesAmountCurrent;
+        public int FilesAmountCurrent { get => filesAmountCurrent; set => Set(ref filesAmountCurrent, value); }
 
         //private Task1Context context;
 
@@ -89,13 +99,15 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnGenerateFilesCommandExecuted(object c)
         {
+            FilesCreatedAmount = 0;
             ProgressBarMin = 0;
-            ProgressBarMax = FILES_AMOUNT;
+            ProgressBarMax = FilesAmountCurrent;
+            CanChangeFilesAmount = false;
 
             FilesCreatedAmount = 0;
             operationIsRunning = true;
 
-            for(int i=0; i< FILES_AMOUNT; i++)
+            for(int i=0; i< FilesAmountCurrent; i++)
             {
                 string fileName = $"data_{i+1}.xml";
                 fileNames.Add(fileName);
@@ -103,7 +115,7 @@ namespace B1_Test_Task.ViewModels
                 FilesCreatedAmount++;
 
                 ProgressBarValue = FilesCreatedAmount;
-                Task1Status = $"generated {FilesCreatedAmount}/{FILES_AMOUNT} files";
+                Task1Status = $"generated {FilesCreatedAmount}/{FilesAmountCurrent} files";
                 
             }
             operationIsRunning = false;
@@ -128,8 +140,9 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnConcatenateFilesCommandExecuted(object c)
         {
+            FilesConcatenatedCount = 0;
             ProgressBarMin = 0;
-            ProgressBarMax = FILES_AMOUNT;
+            ProgressBarMax = FilesAmountCurrent;
             //FilesAreCreating = true;
             Task1Status = "start concatenate files";
             operationIsRunning = true;
@@ -168,7 +181,7 @@ namespace B1_Test_Task.ViewModels
         private async void OnImportDataToDBCommandExecuted(object c)
         {
             ProgressBarMin = 0;
-            ProgressBarMax = FILES_AMOUNT*ROWS_IN_FILE_AMOUNT;
+            ProgressBarMax = FilesAmountCurrent * ROWS_IN_FILE_AMOUNT;
             Task1Status = "start importing data to database";
 
             operationIsRunning = true;
@@ -198,8 +211,8 @@ namespace B1_Test_Task.ViewModels
 
         private async void OnCalculateSummAndMedianCommandExecuted(object c)
         {
-            IntSumm = repository.GetIntSumm();
-            DecimalMedian = repository.GetFloatMedian();
+            IntSumm = await Task.Run(() => repository.GetIntSumm());
+            DecimalMedian = await Task.Run(() => repository.GetFloatMedian());
 
             Task1Status = $"summ of integer : {intSumm}; median of decimals: {DecimalMedian}";
 
@@ -233,6 +246,10 @@ namespace B1_Test_Task.ViewModels
             fileService.OneFileConcatenated += UpdateFileConcatenatedCount;
             fileService.RowImportedToDB += UpdateRowsImportedToDBCount;
 
+            FilesAmountMax = 100;
+            FilesAmountMin = 10;
+            CanChangeFilesAmount = true;
+
             ProgressBarValue = 0;
         }
 
@@ -244,12 +261,16 @@ namespace B1_Test_Task.ViewModels
         {
             List<Row> rows = new List<Row>();
             int a=0;
-            for (int i = 0; i < ROWS_IN_FILE_AMOUNT; i++)
-            {
-                Row row = GenerateRowData();
-                rows.Add(row);
-                a++;
-            }
+
+            await Task.Run(() => {
+                for (int i = 0; i < ROWS_IN_FILE_AMOUNT; i++)
+                {
+                    Row row = GenerateRowData();
+                    rows.Add(row);
+                    a++;
+                }
+            });
+            
             await fileService.WriteDataToFileAsync(rows, fileName);
         }
 

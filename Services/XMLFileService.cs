@@ -120,7 +120,7 @@ namespace B1_Test_Task.Services
             await Task.CompletedTask;
         }
 
-        public async Task ConcatenateXmlFilesWrongAsync(List<string> fileNames, string outputFileName)
+        public async Task XmlFilesWrongAsync(List<string> fileNames, string outputFileName)
         {
             if (File.Exists(outputFileName))
             {
@@ -163,25 +163,21 @@ namespace B1_Test_Task.Services
 
             XmlDocument concatenatedDocument = new XmlDocument();
 
-            // Create the root element for the concatenated document
+            
             XmlElement rootArrayOfRow = concatenatedDocument.CreateElement("ArrayOfRow");
             concatenatedDocument.AppendChild(rootArrayOfRow);
 
-            // Iterate through the list of document paths
             foreach (string documentPath in fileNames)
             {
-                // Load each XML document asynchronously
                 XmlDocument doc = new XmlDocument();
                 await Task.Run(() => doc.Load(documentPath));
 
-                // Get all the "Row" elements from the current document
-                XmlNodeList rowElements = doc.GetElementsByTagName("Row");
+                XmlNodeList rowElements = await Task.Run(() => doc.GetElementsByTagName("Row"));
 
-                // Append each "Row" element to the root element of the concatenated document
                 foreach (XmlNode rowElement in rowElements)
                 {
                     XmlNode importedNode = concatenatedDocument.ImportNode(rowElement, true);
-                    rootArrayOfRow.AppendChild(importedNode);
+                    await Task.Run(() => rootArrayOfRow.AppendChild(importedNode));
                 }
 
                 await Task.Run(() => concatenatedDocument.Save(outputFileName));

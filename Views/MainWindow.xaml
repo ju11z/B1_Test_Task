@@ -25,14 +25,17 @@
                             <ColumnDefinition Width="3*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Task1ViewModel.Task1Status, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Margin="30" HorizontalAlignment="Right" FontSize="24" Grid.Column="1"></TextBlock>
-                        <ProgressBar HorizontalAlignment="Left" Height="20" Margin="30" VerticalAlignment="Top" Width="158" Grid.Column="0" Minimum="{Binding Task1ViewModel.ProgressBarMin, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding Task1ViewModel.ProgressBarMax, UpdateSourceTrigger=PropertyChanged}" Value="{Binding Task1ViewModel.ProgressBarValue, UpdateSourceTrigger=PropertyChanged}"/>
+                        <ProgressBar HorizontalAlignment="Left" Width="200" Height="20" Margin="30" VerticalAlignment="Top" Grid.Column="0" Minimum="{Binding Task1ViewModel.ProgressBarMin, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding Task1ViewModel.ProgressBarMax, UpdateSourceTrigger=PropertyChanged}" Value="{Binding Task1ViewModel.ProgressBarValue, UpdateSourceTrigger=PropertyChanged}"/>
 
                     </Grid>
                     <Grid>
-
+                        
                         <ListView>
                             <ListViewItem Padding="20">
+                                <Grid>
                                 <Button Content="Generate files" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"  Command="{Binding Task1ViewModel.GenerateFilesCommand}" Grid.ColumnSpan="2"/>
+                                    <Slider Margin="167,0,-167.8,0" Minimum="{Binding Task1ViewModel.FilesAmountMin}" Maximum="{Binding Task1ViewModel.FilesAmountMax}" Value="{Binding Task1ViewModel.FilesAmountCurrent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Task1ViewModel.CanChangeFilesAmount, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                                </Grid>
                             </ListViewItem>
                             <ListViewItem Padding="20">
                                 <Grid>
@@ -51,6 +54,7 @@
                                 <Button Content="Calculate summ and median" HorizontalAlignment="Left"  VerticalAlignment="Top" Command="{Binding Task1ViewModel.CalculateSummAndMedianCommand}" Grid.ColumnSpan="2"/>
                             </ListViewItem>
                         </ListView>
+                        
 
 
 
