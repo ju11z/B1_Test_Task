@@ -93,6 +93,8 @@ namespace B1_Test_Task.ViewModels
                 }
             }
 
+            ImportFilesToDBCommand.RaiseCanExecuteChanged();
+
 
         }
 
@@ -138,7 +140,7 @@ namespace B1_Test_Task.ViewModels
         private bool CanImportFilesToDBCommandExecute(object c)
         {
 
-            return true;
+            return FilePaths.Count>0;
 
         }
         #endregion

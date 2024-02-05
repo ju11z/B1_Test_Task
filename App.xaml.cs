@@ -17,7 +17,7 @@ namespace B1_Test_Task
         public App()
         {
             var currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += ExceptionNotifier.NotifyAboutException;
+            //currentDomain.UnhandledException += ExceptionNotifier.NotifyAboutException;
         }
 
         

@@ -59,7 +59,16 @@ namespace B1_Test_Task.Services
 
         public async Task<string> ImportDataToDBAsync(Task2Context context, string filePath)
         {
-            InitWorkBook(filePath);
+            try
+            {
+                InitWorkBook(filePath);
+            }
+            catch(Exception e)
+            {
+                ExceptionNotifier.NotifyAboutException(e.Message);
+                return $" error occured while importing {filePath}";
+            }
+                
 
             ISheet sheet = workBoook.GetSheetAt(0); // Assuming you want to read the first sheet in the Excel file
 
@@ -86,18 +95,26 @@ namespace B1_Test_Task.Services
 
         private void InitWorkBook(string filePath)
         {
-            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            try
             {
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
 
-                if (fileStream.Name.EndsWith(".xlsx"))
-                {
-                    workBoook = new XSSFWorkbook(fileStream);
-                }
-                else
-                {
-                    workBoook = new HSSFWorkbook(fileStream);
+                    if (fileStream.Name.EndsWith(".xlsx"))
+                    {
+                        workBoook = new XSSFWorkbook(fileStream);
+                    }
+                    else
+                    {
+                        workBoook = new HSSFWorkbook(fileStream);
+                    }
                 }
             }
+            catch (IOException ex) // or specific exception type related to file access
+            {
+                throw;
+            }
+
         }
 
         private int ImportStatementToDB(ISheet sheet, Task2Context context)
