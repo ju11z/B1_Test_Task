@@ -121,11 +121,12 @@
                                     <DataGrid.Columns>
                                         <DataGridTextColumn IsReadOnly="True"  Header="Account code"  Binding="{Binding AccCode}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Incoming balance asset" Binding="{Binding IncomingBalanceAsset}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Incoming balance asset" Binding="{Binding IncomingBalanceLiability}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Turnover debet"  Binding="{Binding TurnoverDebet}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Turnover credit"  Binding="{Binding TurnoverCredit}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance asset" Binding="{Binding OutgoingBalanceAsset}" />
                                         <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance liability" Binding="{Binding OutgoingBalanceLiability}" />
-                                        <DataGridTextColumn IsReadOnly="True" Header="Outgoing balance liability" Binding="{Binding DataExamination}" />
+                                        <DataGridTextColumn IsReadOnly="True" Header="Suggested account type" Binding="{Binding AccountType}" />
                                     </DataGrid.Columns>
 
                                 </DataGrid>

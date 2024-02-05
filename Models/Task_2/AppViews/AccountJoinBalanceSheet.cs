@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace B1_Test_Task.Models.Task_2.DBViews
 {
+    public enum AccountType
+    {
+        active,
+        passive,
+        activepassive,
+        undefined
+    }
     public class AccountJoinBalanceSheet
     {
         public int AccCode { get; set; }
@@ -17,6 +24,8 @@ namespace B1_Test_Task.Models.Task_2.DBViews
 
         public double OutgoingBalanceAsset { get; set; }
         public double OutgoingBalanceLiability { get; set; }
+
+        public AccountType AccountType { get; set; }
 
         public bool IsCorrect { get; set; }
     }

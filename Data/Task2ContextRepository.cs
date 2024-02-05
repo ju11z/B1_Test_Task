@@ -17,22 +17,30 @@ namespace B1_Test_Task.Data
             context = new Task2Context();
         }
 
-        private bool BalanceSheetIsCorrect(double IncomingBalanceAsset, double IncomingBalanceLiability, double TurnoverDebet, double TurnoverCredit, double OutgoingBalanceAsset, double OutgoingBalanceLiability)
+        private AccountType SetAccountType(double IncomingBalanceAsset, double IncomingBalanceLiability, double TurnoverDebet, double TurnoverCredit, double OutgoingBalanceAsset, double OutgoingBalanceLiability)
         {
-           
-            if(IncomingBalanceAsset!=0 && IncomingBalanceLiability == 0
-                && Math.Round(IncomingBalanceAsset + TurnoverDebet - TurnoverCredit, 3)==Math.Round(OutgoingBalanceAsset, 3))
-                return true;
-            
+            if (IncomingBalanceAsset != 0 && IncomingBalanceLiability == 0
+                && Math.Round(IncomingBalanceAsset + TurnoverDebet - TurnoverCredit, 3) == Math.Round(OutgoingBalanceAsset, 3))
+                return AccountType.active;
+
             if (IncomingBalanceAsset == 0 && IncomingBalanceLiability != 0
                 && Math.Round(IncomingBalanceLiability - TurnoverDebet + TurnoverCredit, 3) == Math.Round(OutgoingBalanceLiability, 3))
-                return true;
+                return AccountType.passive;
             if (IncomingBalanceAsset != 0 && IncomingBalanceLiability != 0
                 && Math.Round(IncomingBalanceAsset + TurnoverDebet - TurnoverCredit, 3) == Math.Round(OutgoingBalanceAsset, 3)
                 && Math.Round(IncomingBalanceLiability - TurnoverDebet + TurnoverCredit, 3) == Math.Round(OutgoingBalanceLiability, 3))
-                return true;
+                return AccountType.activepassive;
 
+            return AccountType.undefined;
+        }
+
+        private bool BalanceSheetIsCorrect(AccountType type)
+        {
+
+            if (type == AccountType.undefined)
                 return false;
+
+            return true;
             
         }
 
@@ -55,10 +63,13 @@ namespace B1_Test_Task.Data
                               };
 
             List<AccountJoinBalanceSheet> res = new List<AccountJoinBalanceSheet>(data.ToList());
+
+
             
             foreach(var entry in res)
             {
-                entry.IsCorrect = BalanceSheetIsCorrect(entry.IncomingBalanceAsset, entry.IncomingBalanceLiability, entry.TurnoverDebet, entry.TurnoverCredit, entry.OutgoingBalanceAsset, entry.OutgoingBalanceLiability);
+                entry.AccountType = SetAccountType(entry.IncomingBalanceAsset, entry.IncomingBalanceLiability, entry.TurnoverDebet, entry.TurnoverCredit, entry.OutgoingBalanceAsset, entry.OutgoingBalanceLiability);
+                entry.IsCorrect = BalanceSheetIsCorrect(entry.AccountType);
             }
 
             return res;
